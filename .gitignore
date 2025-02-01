@@ -1,1 +1,3 @@
 agent/node_modules
+agent/.env.local
+agent/wallet_data.txt
