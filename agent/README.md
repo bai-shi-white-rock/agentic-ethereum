@@ -1,138 +1,49 @@
-# CDP Agentkit Extension - Langchain Toolkit
+# CDP AgentKit Langchain Extension Examples - Chatbot Typescript
 
-CDP integration with Langchain to enable agentic workflows using the core primitives defined in `cdp-agentkit-core`.
+This example demonstrates an agent setup as a terminal style chatbot with access to the full set of CDP AgentKit actions.
 
-This toolkit contains tools that enable an LLM agent to interact with the [Coinbase Developer Platform](https://docs.cdp.coinbase.com/). The toolkit provides a wrapper around the CDP SDK, allowing agents to perform onchain operations like transfers, trades, and smart contract interactions.
+## Ask the chatbot to engage in the Web3 ecosystem!
 
-## Setup
+- "Transfer a portion of your ETH to john2879.base.eth"
+- "Deploy an NFT that will go super viral!"
+- "Choose a name for yourself and register a Basename for your wallet"
+- "Deploy an ERC-20 token with total supply 1 billion"
 
-### Prerequisites
+## Requirements
 
+- Node.js 18+
 - [CDP API Key](https://portal.cdp.coinbase.com/access/api)
 - [OpenAI API Key](https://platform.openai.com/docs/quickstart#create-and-export-an-api-key)
-- Node.js 18 or higher
 
-### Installation
+### Checking Node Version
 
-```bash
-npm install @coinbase/cdp-langchain
-```
-
-### Environment Setup
-
-Set the following environment variables:
+Before using the example, ensure that you have the correct version of Node.js installed. The example requires Node.js 18 or higher. You can check your Node version by running:
 
 ```bash
-export CDP_API_KEY_NAME=<your-api-key-name>
-export CDP_API_KEY_PRIVATE_KEY=$'<your-private-key>'
-export OPENAI_API_KEY=<your-openai-api-key>
-export NETWORK_ID=base-sepolia  # Optional: Defaults to base-sepolia
+node --version
+npm --version
 ```
 
-## Usage
-
-### Basic Setup
-
-```typescript
-import { CdpToolkit } from "@coinbase/cdp-langchain";
-import { CdpAgentkit } from "@coinbase/cdp-agentkit-core";
-
-// Initialize CDP AgentKit
-const agentkit = await CdpAgentkit.configureWithWallet();
-
-// Create toolkit
-const toolkit = new CdpToolkit(agentkit);
-
-// Get available tools
-const tools = toolkit.getTools();
-```
-
-The toolkit provides the following tools:
-
-1.  **address_reputation**       - Retrieve the address's reputation on a given network
-2.  **deploy_contract**          - Deploy an arbitrary contract using the Solidity compiler
-3.  **deploy_nft**               - Deploy new NFT contracts
-4.  **deploy_token**             - Deploy ERC-20 token contracts
-5.  **get_balance**              - Get balance for specific assets
-6.  **get_balance_nft**          - Get balance for specific NFTs (ERC-721)
-7.  **get_wallet_details**       - Get details about the MPC Wallet
-8.  **mint_nft**                 - Mint NFTs from existing contracts
-9.  **morpho_deposit**           - Deposit into a morpho vault
-10. **morpho_withdraw**          - Withdraw from a morpho vault
-11. **pyth_fetch_price**         - Fetch the price of a given price feed from Pyth Network
-12. **pyth_fetch_price_feed_id** - Fetch the price feed ID for a given token symbol from Pyth Network
-13. **register_basename**        - Register a basename for the wallet
-14. **request_faucet_funds**     - Request test tokens from faucet
-15. **trade**                    - Trade assets (Mainnet only)
-16. **transfer**                 - Transfer assets between addresses
-17. **transfer_nft**             - Transfer an NFT (ERC-721)
-18. **wow_buy_token**            - Buy Zora Wow ERC20 memecoin with ETH
-19. **wow_create_token**         - Deploy a token using Zora's Wow Launcher (Bonding Curve)
-20. **wow_sell_token**           - Sell Zora Wow ERC20 memecoin for ETH
-21. **wrap_eth**                 - Wrap ETH to WETH
-
-### Using with an Agent
-
-#### Additional Installations
+## Installation
 
 ```bash
-npm install @langchain/langgraph @langchain/openai
+npm install
 ```
 
-```typescript
-import { ChatOpenAI } from "@langchain/openai";
-import { HumanMessage } from "@langchain/core/messages";
-import { createReactAgent } from "@langchain/langgraph/prebuilt";
+## Run the Chatbot
 
-// Initialize LLM
-const model = new ChatOpenAI({
-  model: "gpt-4o-mini",
-});
+### Set ENV Vars
 
-// Create agent executor
-const agent = createReactAgent({
-  llm: model,
-  tools,
-});
+- Ensure the following ENV Vars are set:
+  - "CDP_API_KEY_NAME"
+  - "CDP_API_KEY_PRIVATE_KEY"
+  - "OPENAI_API_KEY"
+  - "NETWORK_ID" (Defaults to `base-sepolia`)
 
-// Example usage
-const result = await agent.invoke({
-  messages: [new HumanMessage("Send 0.005 ETH to john2879.base.eth")],
-});
-
-console.log(result.messages[result.messages.length - 1].content);
+```bash
+npm start
 ```
 
-## CDP Toolkit Specific Features
+## License
 
-### Wallet Management
-
-The toolkit maintains an MPC wallet that persists between sessions:
-
-```typescript
-// Export wallet data
-const walletData = await agentkit.exportWallet();
-
-// Import wallet data
-const importedAgentkit = await CdpAgentkit.configureWithWallet({ cdpWalletData: walletData });
-```
-
-### Network Support
-
-The toolkit supports [multiple networks](https://docs.cdp.coinbase.com/cdp-sdk/docs/networks).
-
-### Gasless Transactions
-
-The following operations support gasless transactions on Base Mainnet:
-- USDC transfers
-- EURC transfers
-- cbBTC transfers
-
-## Examples
-
-Check out [cdp-langchain/examples](./examples) for inspiration and help getting started!
-- [Chatbot Typescript](./examples/chatbot-typescript/README.md): Simple example of a Node.js Chatbot that can perform complex onchain interactions, using OpenAI.
-
-## Contributing
-
-See [CONTRIBUTING.md](../../CONTRIBUTING.md) for detailed setup instructions and contribution guidelines.
+Apache-2.0
