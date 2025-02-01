@@ -8,7 +8,7 @@ import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as readline from "readline";
 
-dotenv.config();
+dotenv.config({ path: '.env.local' });
 
 /**
  * Validates that required environment variables are set
