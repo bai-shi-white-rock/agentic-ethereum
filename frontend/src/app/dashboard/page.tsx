@@ -34,7 +34,7 @@ export default function DashboardPage() {
         </div>
         <div className="mt-8 flex gap-4 justify-center">
           <button
-            onClick={() => router.push('/buy')}
+            onClick={() => router.push('/create')}
             className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition-colors"
           >
             Add Investment Plan
