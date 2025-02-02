@@ -16,7 +16,7 @@ export default function Home() {
 
   return (
     <div className="h-screen w-screen flex items-center justify-center">
-      <div className="text-center">
+      <div className="text-center flex flex-col items-center">
         <Image src="/logo-purple.png" alt="Bai Shi Logo" width={200} height={200} />
         <h1 className="text-2xl font-bold my-4">Hello 白石</h1>
         <appkit-button size='md' balance='hide'/>
