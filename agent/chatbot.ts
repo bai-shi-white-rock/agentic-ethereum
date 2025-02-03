@@ -14,6 +14,8 @@ import { HumanMessage } from "@langchain/core/messages";
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
+import purchaseAssets from "./tools/purchase-assets";
+
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as readline from "readline";
@@ -96,6 +98,7 @@ async function initializeAgent() {
     const agentkit = await AgentKit.from({
       walletProvider,
       actionProviders: [
+        purchaseAssets,
         wethActionProvider(),
         pythActionProvider(),
         walletActionProvider(),
@@ -127,11 +130,8 @@ async function initializeAgent() {
         empowered to interact onchain using your tools. If you ever need funds, you can request them from the 
         faucet if you are on network ID 'base-sepolia'. If not, you can provide your wallet details and request 
         funds from the user. Before executing your first action, get the wallet details to see what network 
-        you're on. If there is a 5XX (internal) HTTP error code, ask the user to try again later. If someone 
-        asks you to do something you can't do with your currently available tools, you must say so, and 
-        encourage them to implement it themselves using the CDP SDK + Agentkit, recommend they go to 
-        docs.cdp.coinbase.com for more information. Be concise and helpful with your responses. Refrain from 
-        restating your tools' descriptions unless it is explicitly requested.
+        you're on. If there is a 5XX (internal) HTTP error code, ask the user to try again later. These tools can
+        be used on any network. eg. purchase_assets, weth_deposit, weth_withdraw, etc.
         `,
     });
 
