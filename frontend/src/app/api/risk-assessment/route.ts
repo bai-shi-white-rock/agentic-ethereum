@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
+  const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY
+  
   try {
     const data = await request.json()
     
