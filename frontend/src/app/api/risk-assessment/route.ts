@@ -3,7 +3,7 @@ import Airtable from 'airtable'
 
 const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE_ID!);
 const INVESTMENT_PLANS_TABLE = 'investmentPlans';
-const USERS_TABLE = 'users'; // Make sure this matches your users table name
+const USERS_TABLE = 'users';
 
 interface AirtableError {
   error: string;
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     // First, find the user record ID by wallet address
     const userRecords = await base(USERS_TABLE)
       .select({
-        filterByFormula: `{walletAddress} = '${address}'`, // Replace 'walletAddress' with your actual field name
+        filterByFormula: `{walletAddress} = '${address}'`,
         maxRecords: 1
       })
       .firstPage();
