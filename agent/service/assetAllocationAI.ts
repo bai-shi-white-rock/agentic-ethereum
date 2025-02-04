@@ -11,6 +11,7 @@ import { Document } from "@langchain/core/documents";
 import { Annotation } from "@langchain/langgraph";
 import { concat } from "@langchain/core/utils/stream";
 import { StateGraph } from "@langchain/langgraph";
+import { OpenAI } from "openai";
 
 export async function handleAssetAllocationRequest(
   req: Request,
@@ -123,10 +124,10 @@ export async function handleAssetAllocationRequest(
     Provide an allocation using the assets that you can retrieve from the vector store that is provided in the context.
     {context}
     Question: {question}
-    The allocation percentages must sum to 100%. Return only a JSON object where: - Each key is an asset name - Each value is the percentage allocation (number between 0 and 100)
+    The allocation percentages must sum to 100%. Return only a JSON object where Each key is an asset name and Each value is the percentage allocation (number between 0 and 100). No space or enter"
     Use the following pieces of context to answer the question at the end.
     
-    Helpful Answer: json object like this: "AAPL": 20, "US bonds": 30, "gold": 50`;
+    Helpful Answer: json object like this: {{"AAPL": "20", "US bonds": "30", "gold": "50"}}`;
     const promptTemplate = ChatPromptTemplate.fromMessages([
       ["user", template],
     ]);
@@ -158,6 +159,7 @@ export async function handleAssetAllocationRequest(
         context: docsContent,
       });
       const response = await llm.invoke(messages);
+
       return { answer: response.content };
     };
     // 3. Compile into the graph
@@ -172,22 +174,47 @@ export async function handleAssetAllocationRequest(
     //======= Invoke the graph=======
     let inputs = {
       question: `Based on Modern Portfolio Theory, create an investment asset allocation that maximizes return within the investor's risk tolerance level. Use the following user preference data to inform your decision: ${JSON.stringify(
-        data,
-        null,
-        2
+        data
       )} Provide an allocation using the assets that you can retrieve from the vector store that is provided in the context.
         The allocation percentages must sum to 100%. Return only a JSON object where: - Each key is an asset name - Each value is the percentage allocation (number between 0 and 100)
-        Example format of the output is like this: {AAPL: 20, US bonds: 30, gold: 50}`,
+        Example format of the output is like this: {"AAPL":"20","US bonds":"30","gold":"50"}`,
     };
     const result = await graph.invoke(inputs);
-    console.log(result.context.slice(0, 2));
+    console.log(result.context.slice(0, 1));
     console.log(`\nAnswer: ${result["answer"]}`);
+    // res.json(result["answer"]);
+
+    // ===== Call AI to refine the answer into JSON format ===
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+    const prompt = `I want you to convert this result that is in the form of broken JSON format to JSON format:
+        ${result["answer"]}. The current format is like this: "{\"Money Market Fund\":\"10\",\"Corporate AAA Bonds\":\"20\",\"Vanguard S&P 500 ETF\":\"40\",\"Fidelity Total Market Index Fund\":\"30\"}".
+        But I want the end result to be like this: {"Money Market Fund":"10","Corporate AAA Bonds":"20","Vanguard S&P 500 ETF":"40","Fidelity Total Market Index Fund":"30"}`;
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an experienced fund manager who provides asset allocation advice based on Modern Portfolio Theory.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0,
+      response_format: { type: "json_object" },
+    });
+
+    const allocation = completion.choices[0].message.content;
+    if (!allocation) {
+      throw new Error("No content in response");
+    }
 
     // Response
-    res.json({
-      status: "success",
-      answer: result["answer"],
-    });
+    res.json(allocation);
   } catch (error) {
     console.error("Service error:", error);
     res.status(500).json({ error: "Failed to process request" });
