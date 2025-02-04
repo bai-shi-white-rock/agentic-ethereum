@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { investment_assets } from "../constant/investment_asset_list";
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import { Chroma } from "@langchain/community/vectorstores/chroma";
 import { JSONLoader } from "langchain/document_loaders/fs/json";
@@ -42,7 +43,7 @@ export async function handleAssetAllocationRequest(
       }, // Optional, can be used to specify the distance method of the embedding space https://docs.trychroma.com/usage-guide#changing-the-distance-function
     });
 
-    // // Create documents for loading into vector store
+    // Create documents for loading into vector store
     // const document1: Document = {
     //   pageContent: "The powerhouse of the cell is the mitochondria",
     //   metadata: { source: "https://example.com" },
@@ -67,7 +68,15 @@ export async function handleAssetAllocationRequest(
 
     // await vectorStore.addDocuments(documents, { ids: ["1", "2", "3", "4"] });
 
-    // ======= Load and split content of the asset details =======
+    // Define your Document interface (this may come from LangChain or your own definition)
+    interface Document {
+      pageContent: string;
+      metadata: {
+        source: string;
+      };
+    }
+
+    // // ======= Load and split content of the asset details =======
     const loader = new JSONLoader("constant/investment_asset_list.json", [
       "/investment_asset_list",
     ]);
@@ -89,38 +98,35 @@ export async function handleAssetAllocationRequest(
     await vectorStore.addDocuments(allSplits);
 
     // ======= Pull RAG chat prompt template =======
-    const promptTemplate = await pull<ChatPromptTemplate>("rlm/rag-prompt");
+    // const promptTemplate = await pull<ChatPromptTemplate>("rlm/rag-prompt");
     // Example:
-    const prompt = await promptTemplate.invoke({
-      context: `You are an experienced fund manager who provides asset allocation advice based on Modern Portfolio Theory.`,
-      question: `Based on Modern Portfolio Theory, create an investment asset allocation that maximizes return within the investor's risk tolerance level. Use the following user preference data to inform your decision: ${JSON.stringify(
-        data,
-        null,
-        2
-      )} Provide an allocation using the assets that you can retrieve from the vector store that is provided in the context.
-      The allocation percentages must sum to 100%. Return only a JSON object where: - Each key is an asset name - Each value is the percentage allocation (number between 0 and 100)
-      Example format of the output is like this: {AAPL: 20, US bonds: 30, gold: 50}`,
-    });
-    const messages = prompt.messages;
-    console.log("messages", messages);
-    console.assert(messages.length === 1);
-    messages[0].content;
-
-    // const template = `You are an experienced fund manager who provides asset allocation advice based on Modern Portfolio Theory
-    // Based on Modern Portfolio Theory, create an investment asset allocation that maximizes return within the investor's risk tolerance level. Use the following user preference data to inform your decision: ${JSON.stringify(
-    //   data,
-    //   null,
-    //   2
-    // )} Provide an allocation using the assets that you can retrieve from the vector store that is provided in the context. {context}
+    // const prompt = await promptTemplate.invoke({
+    //   context: `You are an experienced fund manager who provides asset allocation advice based on Modern Portfolio Theory.`,
+    //   question: `Based on Modern Portfolio Theory, create an investment asset allocation that maximizes return within the investor's risk tolerance level. Use the following user preference data to inform your decision: ${JSON.stringify(
+    //     data,
+    //     null,
+    //     2
+    //   )} Provide an allocation using the assets that you can retrieve from the vector store that is provided in the context.
     //   The allocation percentages must sum to 100%. Return only a JSON object where: - Each key is an asset name - Each value is the percentage allocation (number between 0 and 100)
-    // Example format of the output is like this: {{"AAPL": 20, "US bonds": 30, "gold": 50}}
-    // Use the following pieces of context to answer the question at the end.
-    // Question: {question}
+    //   Example format of the output is like this: {AAPL: 20, US bonds: 30, gold: 50}`,
+    // });
+    // const messages = prompt.messages;
+    // console.log("messages", messages);
+    // console.assert(messages.length === 1);
+    // messages[0].content;
 
-    // Helpful Answer: {{"AAPL": 20, "US bonds": 30, "gold": 50}}`;
-    // const promptTemplate = ChatPromptTemplate.fromMessages([
-    //   ["user", template],
-    // ]);
+    // ======= Create a prompt template =======
+    const template = `You are an experienced fund manager who provides asset allocation advice based on Modern Portfolio Theory
+    Provide an allocation using the assets that you can retrieve from the vector store that is provided in the context.
+    {context}
+    Question: {question}
+    The allocation percentages must sum to 100%. Return only a JSON object where: - Each key is an asset name - Each value is the percentage allocation (number between 0 and 100)
+    Use the following pieces of context to answer the question at the end.
+    
+    Helpful Answer: json object like this: "AAPL": 20, "US bonds": 30, "gold": 50`;
+    const promptTemplate = ChatPromptTemplate.fromMessages([
+      ["user", template],
+    ]);
 
     // ======= Create a LangGraph agent =======
     // 1. Create state
@@ -162,8 +168,13 @@ export async function handleAssetAllocationRequest(
 
     //======= Invoke the graph=======
     let inputs = {
-      question:
-        "Help me allocate my portfolio based on my risk tolerance level",
+      question: `Based on Modern Portfolio Theory, create an investment asset allocation that maximizes return within the investor's risk tolerance level. Use the following user preference data to inform your decision: ${JSON.stringify(
+        data,
+        null,
+        2
+      )} Provide an allocation using the assets that you can retrieve from the vector store that is provided in the context.
+        The allocation percentages must sum to 100%. Return only a JSON object where: - Each key is an asset name - Each value is the percentage allocation (number between 0 and 100)
+        Example format of the output is like this: {AAPL: 20, US bonds: 30, gold: 50}`,
     };
     const result = await graph.invoke(inputs);
     console.log(result.context.slice(0, 2));
