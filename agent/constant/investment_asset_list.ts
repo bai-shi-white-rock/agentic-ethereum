@@ -1,4 +1,4 @@
-export const investment_assets = [
+export const investment_asset_list = [
   {
     index: 1,
     name: "High-Yield Savings Account",

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { investment_assets } from "../constant/investment_asset_list";
+import { investment_asset_list } from "../constant/investment_asset_list";
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import { Chroma } from "@langchain/community/vectorstores/chroma";
 import { JSONLoader } from "langchain/document_loaders/fs/json";
@@ -43,59 +43,62 @@ export async function handleAssetAllocationRequest(
       }, // Optional, can be used to specify the distance method of the embedding space https://docs.trychroma.com/usage-guide#changing-the-distance-function
     });
 
-    // Create documents for loading into vector store
-    // const document1: Document = {
-    //   pageContent: "The powerhouse of the cell is the mitochondria",
-    //   metadata: { source: "https://example.com" },
-    // };
-
-    // const document2: Document = {
-    //   pageContent: "Buildings are made out of brick",
-    //   metadata: { source: "https://example.com" },
-    // };
-
-    // const document3: Document = {
-    //   pageContent: "Mitochondria are made out of lipids",
-    //   metadata: { source: "https://example.com" },
-    // };
-
-    // const document4: Document = {
-    //   pageContent: "The 2024 Olympics are in Paris",
-    //   metadata: { source: "https://example.com" },
-    // };
-
-    // const documents = [document1, document2, document3, document4];
-
-    // await vectorStore.addDocuments(documents, { ids: ["1", "2", "3", "4"] });
-
-    // Define your Document interface (this may come from LangChain or your own definition)
+    // ======= Create documents for loading into vector store ======
+    // Option 1: Not using document loader
     interface Document {
       pageContent: string;
       metadata: {
         source: string;
       };
     }
+    // Create the documents array by mapping over investment_assets
+    if (!investment_asset_list) {
+      throw new Error(
+        "investment_asset_list is undefined. Please verify the export in your asset list file and the import path."
+      );
+    }
+    const documents: Document[] = investment_asset_list.map((asset) => {
+      const assetData = {
+        name: asset.name,
+        category: asset.category,
+        description: asset.description,
+        marketCap: asset.marketCap,
+        "12monthsChange": asset["12monthsChange"],
+        country: asset.country,
+      };
 
-    // // ======= Load and split content of the asset details =======
-    const loader = new JSONLoader("constant/investment_asset_list.json", [
-      "/investment_asset_list",
-    ]);
-    const jsonDocs = await loader.load();
-    console.log("json docs loader", jsonDocs);
-    const textLoader = new TextLoader("constant/investment_asset_list.txt");
-    const textDocs = await textLoader.load();
-    console.log("text docs loader", textDocs);
-
-    // ======= Split the text docs into chunks =======
-    const splitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 1000,
-      chunkOverlap: 200,
+      return {
+        pageContent: JSON.stringify(assetData), // pageContent is a JSON string of the asset details
+        metadata: { source: "https://example.com" }, // replace with your actual source if needed
+      };
     });
-    const allSplits = await splitter.splitDocuments(jsonDocs);
-    console.log(`Split blog post into ${allSplits.length} sub-documents.`); // run ได้ถึงตรงนี้แล้ว
+    const indexArrayFromAssets: string[] = investment_asset_list.map((asset) =>
+      String(asset.index)
+    );
 
-    // ======= Storing documents in vector store =======
-    await vectorStore.addDocuments(allSplits);
+    console.log(documents);
+    await vectorStore.addDocuments(documents, { ids: indexArrayFromAssets });
+
+    // Option 2: Using document Loader and Document Splitter
+    // const loader = new JSONLoader("constant/investment_asset_list.json", [
+    //   "/investment_asset_list",
+    // ]);
+    // const jsonDocs = await loader.load();
+    // console.log("json docs loader", jsonDocs);
+    // const textLoader = new TextLoader("constant/investment_asset_list.txt");
+    // const textDocs = await textLoader.load();
+    // console.log("text docs loader", textDocs);
+
+    // // ======= Split the text docs into chunks =======
+    // const splitter = new RecursiveCharacterTextSplitter({
+    //   chunkSize: 1000,
+    //   chunkOverlap: 200,
+    // });
+    // const allSplits = await splitter.splitDocuments(jsonDocs);
+    // console.log(`Split blog post into ${allSplits.length} sub-documents.`); // run ได้ถึงตรงนี้แล้ว
+
+    // // ======= Storing documents in vector store =======
+    // await vectorStore.addDocuments(allSplits);
 
     // ======= Pull RAG chat prompt template =======
     // const promptTemplate = await pull<ChatPromptTemplate>("rlm/rag-prompt");
@@ -115,7 +118,7 @@ export async function handleAssetAllocationRequest(
     // console.assert(messages.length === 1);
     // messages[0].content;
 
-    // ======= Create a prompt template =======
+    // ======= Create a custom prompt template =======
     const template = `You are an experienced fund manager who provides asset allocation advice based on Modern Portfolio Theory
     Provide an allocation using the assets that you can retrieve from the vector store that is provided in the context.
     {context}
