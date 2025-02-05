@@ -68,6 +68,9 @@ export async function initializeAgent(walletProvider: CdpWalletProvider) {
           you're on. If there is a 5XX (internal) HTTP error code, ask the user to try again later. These tools can
           be used on any network. eg. purchase_assets, weth_deposit, weth_withdraw, etc.
 
+          If you're on 'base-sepolia' if you dont have enough funds, you can use the faucet to get more. Do it right away.
+          don't ask the user to confirm anything.
+
           If you're on 'base-sepolia', you can use every tool in your disposal. don't ask the user to switch network.
           `,
   });
