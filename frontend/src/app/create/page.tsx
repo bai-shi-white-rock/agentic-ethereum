@@ -5,6 +5,7 @@ import PairWisePage from "@/components/PairWisePage";
 import { investment_assets } from "@/utils/investment_asset_list";
 import { useRouter } from "next/navigation";
 import { useAppKitAccount } from "@reown/appkit/react";
+import { AssetAllocationChart } from "@/components/AssetAllocationChart";
 
 interface Choice {
   name: string;
@@ -38,7 +39,7 @@ export default function RiskAssessmentPage() {
     image: "",
     marketCap: "",
     twelveMonthsChange: "",
-    country: ""
+    country: "",
   });
 
   const [choice2, setChoice2] = useState<Choice>({
@@ -47,13 +48,21 @@ export default function RiskAssessmentPage() {
     image: "",
     marketCap: "",
     twelveMonthsChange: "",
-    country: ""
+    country: "",
   });
-  
+
   const [selectedChoice, setSelectedChoice] = useState<string>("");
   const [questionIndex, setQuestionIndex] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [assetAllocation, setAssetAllocation] = useState<
+    Record<string, string | number>
+  >({
+    AAPL: 10,
+    "US bonds": 20,
+    gold: 30,
+    "Vanguard S&P 500 ETF": 10,
+    "Fidelity Total Market Index Fund": 30,
+  });
   const getRandomNumber = () => {
     return Math.floor(Math.random() * 20);
   };
@@ -71,23 +80,23 @@ export default function RiskAssessmentPage() {
     const [firstIndex, secondIndex] = getTwoUniqueRandomNumbers();
     const initialChoice1 = investment_assets[firstIndex];
     const initialChoice2 = investment_assets[secondIndex];
-    
+
     setChoice1({
       name: initialChoice1.name,
       description: initialChoice1.description,
       image: initialChoice1.imageURL,
       marketCap: initialChoice1.marketCap,
       twelveMonthsChange: initialChoice1["12monthsChange"],
-      country: initialChoice1.country
+      country: initialChoice1.country,
     });
 
     setChoice2({
-      name: initialChoice2.name, 
+      name: initialChoice2.name,
       description: initialChoice2.description,
       image: initialChoice2.imageURL,
       marketCap: initialChoice2.marketCap,
       twelveMonthsChange: initialChoice2["12monthsChange"],
-      country: initialChoice2.country
+      country: initialChoice2.country,
     });
   }, []);
 
@@ -125,7 +134,7 @@ export default function RiskAssessmentPage() {
 
   const confirm = async () => {
     if (isLoading) return;
-    
+
     setIsLoading(true);
     const summaryRiskPreference = {
       age,
@@ -135,10 +144,10 @@ export default function RiskAssessmentPage() {
       pairWiseResponse,
     };
     try {
-      const response = await fetch('/api/risk-assessment', {
-        method: 'POST',
+      const response = await fetch("/api/risk-assessment", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           address,
@@ -148,20 +157,53 @@ export default function RiskAssessmentPage() {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
-        console.log('Risk assessment submitted successfully:', data);
-        router.push('/pay');
+        // Now call the asset allocation API after the risk assessment is successful.
+        const assetAllocationResponse = await fetch("/api/asset-allocation", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            data: summaryRiskPreference,
+          }),
+        });
+        const assetAllocationData = await assetAllocationResponse.json();
+        if (assetAllocationResponse.ok) {
+          console.log("Suggested asset allocation", assetAllocationData);
+          // Mock first - Use real data after the API is ready
+          setAssetAllocation(assetAllocationData);
+          setPage(7);
+        } else {
+          console.error(
+            "Failed to submit asset allocation:",
+            assetAllocationData.message
+          );
+          alert(
+            assetAllocationData.message ||
+              "Failed to submit asset allocation. Please try again."
+          );
+        }
       } else {
-        console.error('Failed to submit risk assessment:', data.message);
-        alert(data.message || 'Failed to submit risk assessment. Please try again.');
+        console.error("Failed to submit risk assessment:", data.message);
+        alert(
+          data.message || "Failed to submit risk assessment. Please try again."
+        );
       }
     } catch (error) {
-      console.error('Error submitting risk assessment:', error);
-      alert('An error occurred while submitting your risk assessment. Please try again.');
+      console.error("Error submitting risk assessment:", error);
+      alert(
+        "An error occurred while submitting your risk assessment. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleBuyAssets = async () => {
+    console.log("Confirm buying asset allocation");
+    // Call API to agent here
   };
 
   const ConfirmButton = () => (
@@ -169,10 +211,22 @@ export default function RiskAssessmentPage() {
       onClick={confirm}
       disabled={isLoading}
       className={`px-4 py-2 bg-purple-600 text-white rounded-md disabled:opacity-50 ${
-        isLoading ? 'cursor-not-allowed' : 'hover:bg-purple-700'
+        isLoading ? "cursor-not-allowed" : "hover:bg-purple-700"
       }`}
     >
-      {isLoading ? 'Submitting...' : 'Confirm'}
+      {isLoading ? "Submitting..." : "Confirm"}
+    </button>
+  );
+
+  const BuyAssetButton = () => (
+    <button
+      onClick={handleBuyAssets}
+      disabled={isLoading}
+      className={`px-4 py-2 bg-purple-600 text-white rounded-md disabled:opacity-50 ${
+        isLoading ? "cursor-not-allowed" : "hover:bg-purple-700"
+      }`}
+    >
+      {isLoading ? "Submitting..." : "Buy Assets"}
     </button>
   );
 
@@ -213,7 +267,9 @@ export default function RiskAssessmentPage() {
         <h1 className="text-3xl font-bold mb-3 text-gray-800 text-center">
           What is your investment goal?
         </h1>
-        <p className="text-gray-500 text-center mb-8">Choose the option that best matches your financial objectives</p>
+        <p className="text-gray-500 text-center mb-8">
+          Choose the option that best matches your financial objectives
+        </p>
         <div className="space-y-6">
           <button
             onClick={() => setInvestmentGoal("retirement")}
@@ -224,24 +280,43 @@ export default function RiskAssessmentPage() {
             } border-2 rounded-xl p-6 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-md`}
           >
             <div className="flex items-center gap-6">
-              <div className={`${
-                investmentGoal === "retirement"
-                  ? "bg-purple-100 text-purple-600"
-                  : "bg-gray-100 text-gray-600 group-hover:bg-purple-50 group-hover:text-purple-500"
-              } p-4 rounded-full transition-colors duration-200`}>
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+              <div
+                className={`${
+                  investmentGoal === "retirement"
+                    ? "bg-purple-100 text-purple-600"
+                    : "bg-gray-100 text-gray-600 group-hover:bg-purple-50 group-hover:text-purple-500"
+                } p-4 rounded-full transition-colors duration-200`}
+              >
+                <svg
+                  className="w-8 h-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"
+                  ></path>
                 </svg>
               </div>
               <div className="flex-1 text-left">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Retirement Planning</h3>
-                <p className="text-gray-600">Build a secure retirement nest egg with a balanced approach to risk and returns</p>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                  Retirement Planning
+                </h3>
+                <p className="text-gray-600">
+                  Build a secure retirement nest egg with a balanced approach to
+                  risk and returns
+                </p>
               </div>
-              <div className={`${
-                investmentGoal === "retirement"
-                  ? "border-purple-600 bg-purple-600"
-                  : "border-gray-300 bg-white"
-              } w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200`}>
+              <div
+                className={`${
+                  investmentGoal === "retirement"
+                    ? "border-purple-600 bg-purple-600"
+                    : "border-gray-300 bg-white"
+                } w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200`}
+              >
                 {investmentGoal === "retirement" && (
                   <div className="w-2 h-2 rounded-full bg-white"></div>
                 )}
@@ -258,24 +333,43 @@ export default function RiskAssessmentPage() {
             } border-2 rounded-xl p-6 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-md`}
           >
             <div className="flex items-center gap-6">
-              <div className={`${
-                investmentGoal === "aggressive growth"
-                  ? "bg-purple-100 text-purple-600"
-                  : "bg-gray-100 text-gray-600 group-hover:bg-purple-50 group-hover:text-purple-500"
-              } p-4 rounded-full transition-colors duration-200`}>
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+              <div
+                className={`${
+                  investmentGoal === "aggressive growth"
+                    ? "bg-purple-100 text-purple-600"
+                    : "bg-gray-100 text-gray-600 group-hover:bg-purple-50 group-hover:text-purple-500"
+                } p-4 rounded-full transition-colors duration-200`}
+              >
+                <svg
+                  className="w-8 h-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                  ></path>
                 </svg>
               </div>
               <div className="flex-1 text-left">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Aggressive Growth</h3>
-                <p className="text-gray-600">Maximize potential returns with a high-risk, high-reward investment strategy</p>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                  Aggressive Growth
+                </h3>
+                <p className="text-gray-600">
+                  Maximize potential returns with a high-risk, high-reward
+                  investment strategy
+                </p>
               </div>
-              <div className={`${
-                investmentGoal === "aggressive growth"
-                  ? "border-purple-600 bg-purple-600"
-                  : "border-gray-300 bg-white"
-              } w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200`}>
+              <div
+                className={`${
+                  investmentGoal === "aggressive growth"
+                    ? "border-purple-600 bg-purple-600"
+                    : "border-gray-300 bg-white"
+                } w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200`}
+              >
                 {investmentGoal === "aggressive growth" && (
                   <div className="w-2 h-2 rounded-full bg-white"></div>
                 )}
@@ -292,24 +386,43 @@ export default function RiskAssessmentPage() {
             } border-2 rounded-xl p-6 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-md`}
           >
             <div className="flex items-center gap-6">
-              <div className={`${
-                investmentGoal === "steady growth"
-                  ? "bg-purple-100 text-purple-600"
-                  : "bg-gray-100 text-gray-600 group-hover:bg-purple-50 group-hover:text-purple-500"
-              } p-4 rounded-full transition-colors duration-200`}>
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              <div
+                className={`${
+                  investmentGoal === "steady growth"
+                    ? "bg-purple-100 text-purple-600"
+                    : "bg-gray-100 text-gray-600 group-hover:bg-purple-50 group-hover:text-purple-500"
+                } p-4 rounded-full transition-colors duration-200`}
+              >
+                <svg
+                  className="w-8 h-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  ></path>
                 </svg>
               </div>
               <div className="flex-1 text-left">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Steady Growth</h3>
-                <p className="text-gray-600">Focus on consistent, stable returns with a moderate risk approach</p>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                  Steady Growth
+                </h3>
+                <p className="text-gray-600">
+                  Focus on consistent, stable returns with a moderate risk
+                  approach
+                </p>
               </div>
-              <div className={`${
-                investmentGoal === "steady growth"
-                  ? "border-purple-600 bg-purple-600"
-                  : "border-gray-300 bg-white"
-              } w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200`}>
+              <div
+                className={`${
+                  investmentGoal === "steady growth"
+                    ? "border-purple-600 bg-purple-600"
+                    : "border-gray-300 bg-white"
+                } w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200`}
+              >
                 {investmentGoal === "steady growth" && (
                   <div className="w-2 h-2 rounded-full bg-white"></div>
                 )}
@@ -436,12 +549,17 @@ export default function RiskAssessmentPage() {
               <div className="space-y-4">
                 <div className="border-b pb-4">
                   <p className="text-gray-600">Age</p>
-                  <p className="text-lg font-semibold">{age || "Not specified"}</p>
+                  <p className="text-lg font-semibold">
+                    {age || "Not specified"}
+                  </p>
                 </div>
                 <div className="border-b pb-4">
                   <p className="text-gray-600">Investment Goal</p>
                   <p className="text-lg font-semibold">
-                    {investmentGoal ? investmentGoal.charAt(0).toUpperCase() + investmentGoal.slice(1) : "Not specified"}
+                    {investmentGoal
+                      ? investmentGoal.charAt(0).toUpperCase() +
+                        investmentGoal.slice(1)
+                      : "Not specified"}
                   </p>
                 </div>
                 <div className="border-b pb-4">
@@ -461,7 +579,9 @@ export default function RiskAssessmentPage() {
 
             {/* Right Card */}
             <div className="flex-1 bg-white rounded-lg shadow-md p-6">
-              <p className="text-gray-600 mb-4 font-semibold">Pair-wise Comparisons</p>
+              <p className="text-gray-600 mb-4 font-semibold">
+                Pair-wise Comparisons
+              </p>
               <div className="space-y-3">
                 {pairWiseResponse.map((response, index) => (
                   <div key={index} className="bg-gray-50 p-3 rounded-md">
@@ -499,6 +619,22 @@ export default function RiskAssessmentPage() {
     );
   };
 
+  const confirmAssetAllocationPage = () => {
+    return (
+      <div className="max-w-6xl mx-auto p-6 flex flex-col gap-4">
+        <h1 className="text-2xl font-bold mb-6 text-gray-800 text-center">
+          Your Personalized Asset Allocation
+        </h1>
+        <div className="flex justify-center">
+          <AssetAllocationChart allocation={assetAllocation} />
+        </div>
+        <div className="flex justify-center">
+          <BuyAssetButton />
+        </div>
+      </div>
+    );
+  };
+
   const nextPair = () => {
     setPairWiseResponse([
       ...pairWiseResponse,
@@ -520,7 +656,7 @@ export default function RiskAssessmentPage() {
       image: newChoice1.imageURL,
       marketCap: newChoice1.marketCap,
       twelveMonthsChange: newChoice1["12monthsChange"],
-      country: newChoice1.country
+      country: newChoice1.country,
     });
     setChoice2({
       name: newChoice2.name,
@@ -528,7 +664,7 @@ export default function RiskAssessmentPage() {
       image: newChoice2.imageURL,
       marketCap: newChoice2.marketCap,
       twelveMonthsChange: newChoice2["12monthsChange"],
-      country: newChoice2.country
+      country: newChoice2.country,
     });
   };
 
@@ -543,7 +679,7 @@ export default function RiskAssessmentPage() {
       image: newChoice1.imageURL,
       marketCap: newChoice1.marketCap,
       twelveMonthsChange: newChoice1["12monthsChange"],
-      country: newChoice1.country
+      country: newChoice1.country,
     });
     setChoice2({
       name: newChoice2.name,
@@ -551,7 +687,7 @@ export default function RiskAssessmentPage() {
       image: newChoice2.imageURL,
       marketCap: newChoice2.marketCap,
       twelveMonthsChange: newChoice2["12monthsChange"],
-      country: newChoice2.country
+      country: newChoice2.country,
     });
   };
 
@@ -590,6 +726,7 @@ export default function RiskAssessmentPage() {
         />
       )}
       {page === 6 && confirmPage()}
+      {page === 7 && confirmAssetAllocationPage()}
     </div>
   );
 }

@@ -1,0 +1,224 @@
+{
+  "investment_asset_list": [
+    {
+      "index": 1,
+      "name": "High-Yield Savings Account",
+      "category": "Cash Savings",
+      "description": "FDIC-insured savings account offering higher interest rates than traditional accounts",
+      "smart_contract_address": "",
+      "imageURL": "/assets/savings.png",
+      "marketCap": "N/A",
+      "12monthsChange": "+4.5%",
+      "country": "USA"
+    },
+    {
+      "index": 2,
+      "name": "US Treasury Bonds",
+      "category": "Bonds",
+      "description": "Government-backed fixed-income securities with various maturity periods",
+      "smart_contract_address": "",
+      "imageURL": "/assets/treasury.png",
+      "marketCap": "23000",
+      "12monthsChange": "-2.1%",
+      "country": "USA"
+    },
+    {
+      "index": 3,
+      "name": "Corporate AAA Bonds",
+      "category": "Bonds",
+      "description": "High-grade corporate bonds from established companies with excellent credit ratings",
+      "smart_contract_address": "",
+      "imageURL": "/assets/corporate-bonds.png",
+      "marketCap": "12000",
+      "12monthsChange": "-1.8%",
+      "country": "Global"
+    },
+    {
+      "index": 4,
+      "name": "Apple Inc. (AAPL)",
+      "category": "Stocks",
+      "description": "Common stock shares of Apple Inc., a leading technology company",
+      "smart_contract_address": "",
+      "imageURL": "/assets/aapl.png",
+      "marketCap": "2800",
+      "12monthsChange": "+21.5%",
+      "country": "USA"
+    },
+    {
+      "index": 5,
+      "name": "Microsoft (MSFT)",
+      "category": "Stocks",
+      "description": "Common stock shares of Microsoft Corporation, a major software and cloud computing company",
+      "smart_contract_address": "",
+      "imageURL": "/assets/msft.png",
+      "marketCap": "3100",
+      "12monthsChange": "+25.3%",
+      "country": "USA"
+    },
+    {
+      "index": 6,
+      "name": "Vanguard S&P 500 ETF",
+      "category": "Funds",
+      "description": "Exchange-traded fund tracking the S&P 500 index of large-cap US stocks",
+      "smart_contract_address": "",
+      "imageURL": "/assets/voo.png",
+      "marketCap": "850",
+      "12monthsChange": "+18.2%",
+      "country": "USA"
+    },
+    {
+      "index": 7,
+      "name": "Bitcoin (BTC)",
+      "category": "Cryptocurrencies",
+      "description": "The first and largest cryptocurrency by market capitalization",
+      "smart_contract_address": "",
+      "imageURL": "/assets/btc.png",
+      "marketCap": "1200",
+      "12monthsChange": "+62.4%",
+      "country": "Global"
+    },
+    {
+      "index": 8,
+      "name": "Ethereum (ETH)",
+      "category": "Cryptocurrencies",
+      "description": "Leading smart contract platform and second-largest cryptocurrency",
+      "smart_contract_address": "",
+      "imageURL": "/assets/eth.png",
+      "marketCap": "380",
+      "12monthsChange": "+48.7%",
+      "country": "Global"
+    },
+    {
+      "index": 9,
+      "name": "Residential Real Estate Trust",
+      "category": "Real Estate",
+      "description": "Investment trust focused on residential property portfolios",
+      "smart_contract_address": "",
+      "imageURL": "/assets/residential-reit.png",
+      "marketCap": "45",
+      "12monthsChange": "+8.3%",
+      "country": "USA"
+    },
+    {
+      "index": 10,
+      "name": "Commercial REIT",
+      "category": "Real Estate",
+      "description": "Real Estate Investment Trust specializing in commercial properties",
+      "smart_contract_address": "",
+      "imageURL": "/assets/commercial-reit.png",
+      "marketCap": "38",
+      "12monthsChange": "+5.2%",
+      "country": "USA"
+    },
+    {
+      "index": 11,
+      "name": "Money Market Fund",
+      "category": "Cash Savings",
+      "description": "Low-risk investment vehicle investing in short-term debt securities",
+      "smart_contract_address": "",
+      "imageURL": "/assets/money-market.png",
+      "marketCap": "180",
+      "12monthsChange": "+4.1%",
+      "country": "USA"
+    },
+    {
+      "index": 12,
+      "name": "Municipal Bonds",
+      "category": "Bonds",
+      "description": "Tax-exempt bonds issued by state and local governments",
+      "smart_contract_address": "",
+      "imageURL": "/assets/muni-bonds.png",
+      "marketCap": "4000",
+      "12monthsChange": "-0.8%",
+      "country": "USA"
+    },
+    {
+      "index": 13,
+      "name": "Amazon.com (AMZN)",
+      "category": "Stocks",
+      "description": "Common stock shares of Amazon.com, leading e-commerce and cloud services provider",
+      "smart_contract_address": "",
+      "imageURL": "/assets/amzn.png",
+      "marketCap": "1800",
+      "12monthsChange": "+32.1%",
+      "country": "USA"
+    },
+    {
+      "index": 14,
+      "name": "Solana (SOL)",
+      "category": "Cryptocurrencies",
+      "description": "High-performance blockchain platform for decentralized applications",
+      "smart_contract_address": "",
+      "imageURL": "/assets/sol.png",
+      "marketCap": "45",
+      "12monthsChange": "+280.5%",
+      "country": "Global"
+    },
+    {
+      "index": 15,
+      "name": "Fidelity Total Market Index Fund",
+      "category": "Funds",
+      "description": "Mutual fund providing broad exposure to the entire US stock market",
+      "smart_contract_address": "",
+      "imageURL": "/assets/fidelity.png",
+      "marketCap": "420",
+      "12monthsChange": "+16.8%",
+      "country": "USA"
+    },
+    {
+      "index": 16,
+      "name": "Industrial REIT",
+      "category": "Real Estate",
+      "description": "Real Estate Investment Trust focusing on industrial and logistics properties",
+      "smart_contract_address": "",
+      "imageURL": "/assets/industrial-reit.png",
+      "marketCap": "28",
+      "12monthsChange": "+12.4%",
+      "country": "USA"
+    },
+    {
+      "index": 17,
+      "name": "Certificate of Deposit (CD)",
+      "category": "Cash Savings",
+      "description": "Time-deposit account with fixed interest rate and maturity date",
+      "smart_contract_address": "",
+      "imageURL": "/assets/cd.png",
+      "marketCap": "N/A",
+      "12monthsChange": "+4.8%",
+      "country": "USA"
+    },
+    {
+      "index": 18,
+      "name": "Google (GOOGL)",
+      "category": "Stocks",
+      "description": "Common stock shares of Alphabet Inc., parent company of Google",
+      "smart_contract_address": "",
+      "imageURL": "/assets/googl.png",
+      "marketCap": "1750",
+      "12monthsChange": "+28.7%",
+      "country": "USA"
+    },
+    {
+      "index": 19,
+      "name": "Cardano (ADA)",
+      "category": "Cryptocurrencies",
+      "description": "Proof-of-stake blockchain platform with focus on sustainability",
+      "smart_contract_address": "",
+      "imageURL": "/assets/ada.png",
+      "marketCap": "15",
+      "12monthsChange": "+32.4%",
+      "country": "Global"
+    },
+    {
+      "index": 20,
+      "name": "iShares Global REIT ETF",
+      "category": "Real Estate",
+      "description": "Exchange-traded fund investing in real estate companies worldwide",
+      "smart_contract_address": "",
+      "imageURL": "/assets/global-reit.png",
+      "marketCap": "85",
+      "12monthsChange": "+7.2%",
+      "country": "Global"
+    }
+  ]
+}
