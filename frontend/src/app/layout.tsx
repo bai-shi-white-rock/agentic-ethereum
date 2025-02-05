@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Noto_Sans, Kiwi_Maru } from "next/font/google";
+import { Noto_Sans } from "next/font/google";
 import "./globals.css";
 import { headers } from "next/headers"; // added
 import ContextProvider from '@/context';
@@ -8,12 +8,6 @@ import Providers from './Providers';
 const notoSans = Noto_Sans({
   weight: ['400', '500', '700'],  // Regular, Medium, and Bold weights
   variable: '--font-noto-sans',
-  subsets: ['latin'],
-});
-
-const kiwiMaru = Kiwi_Maru({
-  weight: ['300', '400', '500'],  // Light, Regular, and Medium weights
-  variable: '--font-kiwi-maru',
   subsets: ['latin'],
 });
 
@@ -31,7 +25,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${notoSans.variable} ${kiwiMaru.variable} antialiased`}>
+      <body className={`${notoSans.variable} antialiased`}>
         <Providers>
           <ContextProvider cookies={cookies}>{children}</ContextProvider>
         </Providers>

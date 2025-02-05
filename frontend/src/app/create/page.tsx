@@ -125,7 +125,7 @@ export default function RiskAssessmentPage() {
   const NextButton = () => (
     <button
       onClick={nextPage}
-      className="px-4 py-2 bg-purple-600 text-white rounded-md disabled:opacity-50"
+      className="px-4 py-2 bg-primary text-white rounded-md disabled:opacity-50"
       hidden={page === 6}
     >
       Next
@@ -210,8 +210,8 @@ export default function RiskAssessmentPage() {
     <button
       onClick={confirm}
       disabled={isLoading}
-      className={`px-4 py-2 bg-purple-600 text-white rounded-md disabled:opacity-50 ${
-        isLoading ? "cursor-not-allowed" : "hover:bg-purple-700"
+      className={`px-4 py-2 bg-primary text-white rounded-md disabled:opacity-50 ${
+        isLoading ? "cursor-not-allowed" : "hover:bg-secondary"
       }`}
     >
       {isLoading ? "Submitting..." : "Confirm"}
@@ -222,8 +222,8 @@ export default function RiskAssessmentPage() {
     <button
       onClick={handleBuyAssets}
       disabled={isLoading}
-      className={`px-4 py-2 bg-purple-600 text-white rounded-md disabled:opacity-50 ${
-        isLoading ? "cursor-not-allowed" : "hover:bg-purple-700"
+      className={`px-4 py-2 bg-primary text-white rounded-md disabled:opacity-50 ${
+        isLoading ? "cursor-not-allowed" : "hover:bg-secondary"
       }`}
     >
       {isLoading ? "Submitting..." : "Buy Assets"}
@@ -247,7 +247,7 @@ export default function RiskAssessmentPage() {
               }
             }}
             placeholder="Enter your age"
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             min="0"
             max="120"
             required
@@ -275,7 +275,7 @@ export default function RiskAssessmentPage() {
             onClick={() => setInvestmentGoal("retirement")}
             className={`w-full group ${
               investmentGoal === "retirement"
-                ? "bg-purple-50 border-purple-600"
+                ? "bg-primary/10 border-primary"
                 : "bg-white hover:bg-gray-50 border-gray-200"
             } border-2 rounded-xl p-6 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-md`}
           >
@@ -283,8 +283,8 @@ export default function RiskAssessmentPage() {
               <div
                 className={`${
                   investmentGoal === "retirement"
-                    ? "bg-purple-100 text-purple-600"
-                    : "bg-gray-100 text-gray-600 group-hover:bg-purple-50 group-hover:text-purple-500"
+                    ? "bg-primary/10 text-primary"
+                    : "bg-gray-100 text-gray-600 group-hover:bg-primary/10 group-hover:text-primary"
                 } p-4 rounded-full transition-colors duration-200`}
               >
                 <svg
@@ -313,7 +313,7 @@ export default function RiskAssessmentPage() {
               <div
                 className={`${
                   investmentGoal === "retirement"
-                    ? "border-purple-600 bg-purple-600"
+                    ? "border-primary bg-primary"
                     : "border-gray-300 bg-white"
                 } w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200`}
               >
@@ -328,7 +328,7 @@ export default function RiskAssessmentPage() {
             onClick={() => setInvestmentGoal("aggressive growth")}
             className={`w-full group ${
               investmentGoal === "aggressive growth"
-                ? "bg-purple-50 border-purple-600"
+                ? "bg-primary/10 border-primary"
                 : "bg-white hover:bg-gray-50 border-gray-200"
             } border-2 rounded-xl p-6 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-md`}
           >
@@ -336,8 +336,8 @@ export default function RiskAssessmentPage() {
               <div
                 className={`${
                   investmentGoal === "aggressive growth"
-                    ? "bg-purple-100 text-purple-600"
-                    : "bg-gray-100 text-gray-600 group-hover:bg-purple-50 group-hover:text-purple-500"
+                    ? "bg-primary/10 text-primary"
+                    : "bg-gray-100 text-gray-600 group-hover:bg-primary/10 group-hover:text-primary"
                 } p-4 rounded-full transition-colors duration-200`}
               >
                 <svg
@@ -366,7 +366,7 @@ export default function RiskAssessmentPage() {
               <div
                 className={`${
                   investmentGoal === "aggressive growth"
-                    ? "border-purple-600 bg-purple-600"
+                    ? "border-primary bg-primary"
                     : "border-gray-300 bg-white"
                 } w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200`}
               >
@@ -381,7 +381,7 @@ export default function RiskAssessmentPage() {
             onClick={() => setInvestmentGoal("steady growth")}
             className={`w-full group ${
               investmentGoal === "steady growth"
-                ? "bg-purple-50 border-purple-600"
+                ? "bg-primary/10 border-primary"
                 : "bg-white hover:bg-gray-50 border-gray-200"
             } border-2 rounded-xl p-6 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-md`}
           >
@@ -389,8 +389,8 @@ export default function RiskAssessmentPage() {
               <div
                 className={`${
                   investmentGoal === "steady growth"
-                    ? "bg-purple-100 text-purple-600"
-                    : "bg-gray-100 text-gray-600 group-hover:bg-purple-50 group-hover:text-purple-500"
+                    ? "bg-primary/10 text-primary"
+                    : "bg-gray-100 text-gray-600 group-hover:bg-primary/10 group-hover:text-primary"
                 } p-4 rounded-full transition-colors duration-200`}
               >
                 <svg
@@ -419,7 +419,7 @@ export default function RiskAssessmentPage() {
               <div
                 className={`${
                   investmentGoal === "steady growth"
-                    ? "border-purple-600 bg-purple-600"
+                    ? "border-primary bg-primary"
                     : "border-gray-300 bg-white"
                 } w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200`}
               >
@@ -447,8 +447,8 @@ export default function RiskAssessmentPage() {
             disabled={!investmentGoal}
             className={`px-6 py-3 rounded-lg font-medium ${
               investmentGoal
-                ? "bg-purple-600 text-white hover:bg-purple-700"
-                : "bg-purple-200 text-white cursor-not-allowed"
+                ? "bg-primary text-white hover:bg-secondary"
+                : "bg-primary/20 text-white cursor-not-allowed"
             } transition-colors duration-200`}
           >
             Next
@@ -462,7 +462,7 @@ export default function RiskAssessmentPage() {
     return (
       <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
-          How much can you invest monthly?
+          How much do you want to invest monthly?
         </h1>
         <div className="space-y-4">
           <div className="relative">
@@ -477,7 +477,7 @@ export default function RiskAssessmentPage() {
                 }
               }}
               placeholder="Enter amount"
-              className="w-full p-3 pl-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full p-3 pl-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               min="0"
               required
             />
@@ -495,7 +495,7 @@ export default function RiskAssessmentPage() {
     return (
       <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
-          What is your risk tolerance?
+          How much risk are you comfortable with?
         </h1>
         <p className="text-gray-600 mb-4">
           On a scale of 1-7, where 1 is very conservative and 7 is very
@@ -509,9 +509,9 @@ export default function RiskAssessmentPage() {
                 onClick={() => setRiskTolerance(value.toString())}
                 className={`w-10 h-10 rounded-full ${
                   riskTolerance === value.toString()
-                    ? "bg-purple-600 text-white"
+                    ? "bg-primary text-white"
                     : "bg-gray-200 text-gray-700"
-                } hover:bg-purple-500 hover:text-white transition-colors`}
+                } hover:bg-primary hover:text-white transition-colors`}
               >
                 {value}
               </button>
@@ -592,7 +592,7 @@ export default function RiskAssessmentPage() {
                       <span
                         className={`text-sm ${
                           response.selectedChoice === response.choice1
-                            ? "font-bold text-purple-600"
+                            ? "font-bold text-primary"
                             : ""
                         }`}
                       >
@@ -602,7 +602,7 @@ export default function RiskAssessmentPage() {
                       <span
                         className={`text-sm ${
                           response.selectedChoice === response.choice2
-                            ? "font-bold text-purple-600"
+                            ? "font-bold text-primary"
                             : ""
                         }`}
                       >
@@ -693,20 +693,6 @@ export default function RiskAssessmentPage() {
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen py-8 px-6">
-      <button
-        onClick={() => {
-          console.log({
-            age,
-            investmentPerMonth,
-            investmentGoal,
-            riskTolerance,
-            pairWiseResponse,
-          });
-        }}
-        className="fixed bottom-4 right-4 px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700"
-      >
-        Debug State
-      </button>
       {page === 1 && agePage()}
       {page === 2 && investmentGoalPage()}
       {page === 3 && investmentPerMonthPage()}

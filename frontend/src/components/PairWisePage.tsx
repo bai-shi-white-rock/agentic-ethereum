@@ -45,7 +45,7 @@ export default function PairWisePage({
                     onClick={() => setSelectedChoice(choice1.name)}
                     className={`w-96 p-6 rounded-xl cursor-pointer transition-all duration-200 ${
                         selectedChoice === choice1.name
-                            ? 'bg-purple-100 border-2 border-purple-600 shadow-lg transform -translate-y-1'
+                            ? 'bg-primary/10 border-2 border-primary shadow-lg transform -translate-y-1'
                             : 'bg-white border border-gray-200 hover:shadow-md'
                     }`}
                 >
@@ -86,7 +86,7 @@ export default function PairWisePage({
                     onClick={() => setSelectedChoice(choice2.name)}
                     className={`w-96 p-6 rounded-xl cursor-pointer transition-all duration-200 ${
                         selectedChoice === choice2.name
-                            ? 'bg-purple-100 border-2 border-purple-600 shadow-lg transform -translate-y-1'
+                            ? 'bg-primary/10 border-2 border-primary shadow-lg transform -translate-y-1'
                             : 'bg-white border border-gray-200 hover:shadow-md'
                     }`}
                 >
@@ -133,7 +133,7 @@ export default function PairWisePage({
                 </button>
                 <button 
                     onClick={nextPair}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-md disabled:opacity-50"
+                    className="px-4 py-2 bg-primary text-white rounded-md disabled:opacity-50"
                     hidden={questionIndex === 10}
                 >
                     Next
