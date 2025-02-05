@@ -1,0 +1,17 @@
+type RateSet @entity(immutable: true) {
+  id: Bytes!
+  tokenA: Bytes! # address
+  tokenB: Bytes! # address
+  amountA: BigInt! # uint256
+  amountB: BigInt! # uint256
+}
+
+type TokensSwapped @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  tokenFrom: Bytes! # address
+  tokenTo: Bytes! # address
+  amountFrom: BigInt! # uint256
+  amountTo: BigInt! # uint256
+  blockTimestamp: BigInt!
+}
