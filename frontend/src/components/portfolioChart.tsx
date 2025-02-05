@@ -47,7 +47,7 @@ export default function PortfolioChart() {
   const performanceChange = calculatePerformance();
   
   return (
-    <Card>
+    <Card className="w-full my-8">
       <CardHeader>
         <CardTitle>Portfolio Performance</CardTitle>
         <CardDescription>+{performanceChange}% total return</CardDescription>
