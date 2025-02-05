@@ -8,25 +8,64 @@ import { Button } from "@/components/ui/button";
 import PortfolioChart from "@/components/portfolioChart";
 import { DonutChart } from "@/components/donutChart";
 
+interface RateSet {
+  id: string;
+  tokenA: string;
+  tokenB: string;
+  amountA: string;
+  amountB: string;
+}
+
+interface TokenSwapped {
+  id: string;
+  user: string;
+  tokenFrom: string;
+  tokenTo: string;
+  amountFrom: string;
+  amountTo: string;
+  blockTimestamp: string;
+}
+
+interface InvestmentPlan {
+  id: string;
+  totalInvestment: number;
+  assetAllocation: string;
+  investmentPerMonth: number;
+  createdAt: string;
+}
+
+interface PortfolioData {
+  investmentPlans: InvestmentPlan[];
+  graphData: {
+    rateSets: RateSet[];
+    swapHistory: TokenSwapped[];
+  };
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [portfolioValue, setPortfolioValue] = useState<number>(0);
-  const [investmentPlans, setInvestmentPlans] = useState<any[]>([]);
+  const [investmentPlans, setInvestmentPlans] = useState<InvestmentPlan[]>([]);
   const { address } = useAppKitAccount();
   const [isOpenPortfolio, setIsOpenPortfolio] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchInvestmentPlans = async () => {
       const response = await fetch(`/api/portfolio?address=${address}`);
-      const data = await response.json();
-      const totalPortfolioValue = data.data.reduce(
-        (sum: number, plan: { totalInvestment?: number }) => sum + (plan.totalInvestment || 0),
+      const result = await response.json();
+      const data = result.data as PortfolioData;
+      const totalPortfolioValue = data.graphData.swapHistory.reduce(
+        (sum: number, swap: TokenSwapped) =>
+          sum + parseFloat(swap.amountFrom) / 1000000, // 6 decimals in USDC 
         0
       );
       setPortfolioValue(totalPortfolioValue);
-      setInvestmentPlans(data.data);
+      setInvestmentPlans(data.investmentPlans);
     };
-    fetchInvestmentPlans();
+    
+    if (address) {
+      fetchInvestmentPlans();
+    }
   }, [address]);
 
   return (
@@ -99,20 +138,27 @@ export default function DashboardPage() {
                       </p>
                     ) : (
                       investmentPlans.map((plan) => (
-                        <div 
+                        <div
                           key={plan.id}
                           className="border rounded-lg p-4 mb-4 hover:shadow-md transition-shadow"
                         >
                           <div className="flex justify-between items-center">
                             <div>
-                              <p className="font-medium">Plan {investmentPlans.indexOf(plan) + 1}</p>
+                              <p className="font-medium">
+                                Plan {investmentPlans.indexOf(plan) + 1}
+                              </p>
                               <p className="text-sm text-gray-500">
-                                Created at {new Date(plan.createdAt).toLocaleDateString()}
+                                Created at{" "}
+                                {new Date(plan.createdAt).toLocaleDateString()}
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="font-bold">${plan.totalInvestment.toLocaleString()}</p>
-                              <p className="text-sm text-gray-500">Total Investment</p>
+                              <p className="font-bold">
+                                ${plan.totalInvestment.toLocaleString()}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                Total Investment
+                              </p>
                             </div>
                           </div>
                           <div className="mt-2 text-sm">
@@ -121,11 +167,11 @@ export default function DashboardPage() {
                             </p>
                           </div>
                           <div className="mt-4">
-                            <Button 
+                            <Button
                               className="w-full bg-primary text-white my-4"
                               onClick={() => {
                                 // TODO: Implement sell functionality
-                                console.log('Selling plan:', plan.id);
+                                console.log("Selling plan:", plan.id);
                               }}
                             >
                               Sell

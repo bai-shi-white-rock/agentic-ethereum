@@ -16,15 +16,12 @@ dataSources:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - OwnershipTransferred
         - RateSet
         - TokensSwapped
       abis:
         - name: MOCK_Exchange
           file: ./abis/MOCK_Exchange.json
       eventHandlers:
-        - event: OwnershipTransferred(indexed address,indexed address)
-          handler: handleOwnershipTransferred
         - event: RateSet(address,address,uint256,uint256)
           handler: handleRateSet
         - event: TokensSwapped(indexed address,address,address,uint256,uint256)
