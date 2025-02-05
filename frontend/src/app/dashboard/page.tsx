@@ -48,25 +48,42 @@ export default function DashboardPage() {
   const [investmentPlans, setInvestmentPlans] = useState<InvestmentPlan[]>([]);
   const { address } = useAppKitAccount();
   const [isOpenPortfolio, setIsOpenPortfolio] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchInvestmentPlans = async () => {
-      const response = await fetch(`/api/portfolio?address=${address}`);
-      const result = await response.json();
-      const data = result.data as PortfolioData;
-      const totalPortfolioValue = data.graphData.swapHistory.reduce(
-        (sum: number, swap: TokenSwapped) =>
-          sum + parseFloat(swap.amountFrom) / 1000000, // 6 decimals in USDC 
-        0
-      );
-      setPortfolioValue(totalPortfolioValue);
-      setInvestmentPlans(data.investmentPlans);
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/portfolio?address=${address}`);
+        const result = await response.json();
+        const data = result.data as PortfolioData;
+        const totalPortfolioValue = data.graphData.swapHistory.reduce(
+          (sum: number, swap: TokenSwapped) =>
+            sum + parseFloat(swap.amountFrom) / 1000000, // 6 decimals in USDC 
+          0
+        );
+        setPortfolioValue(totalPortfolioValue);
+        setInvestmentPlans(data.investmentPlans);
+      } catch (error) {
+        console.error('Error fetching portfolio data:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     if (address) {
       fetchInvestmentPlans();
     }
   }, [address]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full p-4 flex flex-col items-center justify-center">
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-lg text-gray-600">Loading your portfolio...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full p-4 flex items-center justify-center">
@@ -170,8 +187,7 @@ export default function DashboardPage() {
                             <Button
                               className="w-full bg-primary text-white my-4"
                               onClick={() => {
-                                // TODO: Implement sell functionality
-                                console.log("Selling plan:", plan.id);
+                                alert("This feature is not available yet in the hackathon. Coming soon!");
                               }}
                             >
                               Sell
