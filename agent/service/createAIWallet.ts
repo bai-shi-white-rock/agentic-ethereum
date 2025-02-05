@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { CdpWalletProvider } from "@coinbase/agentkit";
+import { english, generateMnemonic } from "viem/accounts";
 import Airtable from "airtable";
 
 export async function handleCreateAIWalletRequest(req: Request, res: Response) {
@@ -31,7 +32,15 @@ export async function handleCreateAIWalletRequest(req: Request, res: Response) {
       });
     }
 
+    if (userRecords[0].fields.cdpMnemonicPhrase) {
+      return res.status(400).json({
+        error: "Wallet already has an AI wallet",
+      });
+    }
+
     const userRecordId = userRecords[0].id;
+
+    const mnemonic = generateMnemonic(english);
 
     // Configure CDP Wallet Provider
     const config = {
@@ -40,7 +49,7 @@ export async function handleCreateAIWalletRequest(req: Request, res: Response) {
         /\\n/g,
         "\n"
       ),
-      cdpWalletData: undefined, // We'll create a new wallet
+      mnemonicPhrase: mnemonic,
       networkId: process.env.NETWORK_ID || "base-sepolia",
     };
 
@@ -53,7 +62,8 @@ export async function handleCreateAIWalletRequest(req: Request, res: Response) {
         id: userRecordId,
         fields: {
           walletAddress: walletAddress,
-          cdpWalletData: JSON.stringify(exportedWallet),
+          cdpMnemonicPhrase: mnemonic,
+          agentWalletAddress: walletProvider.getAddress(),
         },
       },
     ]);

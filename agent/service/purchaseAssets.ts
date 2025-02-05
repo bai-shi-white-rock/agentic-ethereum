@@ -14,11 +14,9 @@ export async function handlePurchaseAssetsRequest(req: Request, res: Response) {
     const { walletAddress, purchaseOrder } = req.body;
 
     if (!walletAddress || !purchaseOrder) {
-      return res
-        .status(400)
-        .json({
-          error: "Missing `walletAddress` or `purchaseOrder` in request body",
-        });
+      return res.status(400).json({
+        error: "Missing `walletAddress` or `purchaseOrder` in request body",
+      });
     }
 
     // First, find the user record ID by wallet address
@@ -35,9 +33,8 @@ export async function handlePurchaseAssetsRequest(req: Request, res: Response) {
       });
     }
 
-    const userRecordId = userRecords[0].id;
-    const cdpWalletData = userRecords[0].fields.cdpWalletData as string;
-
+    const cdpMnemonicPhrase = userRecords[0].fields.cdpMnemonicPhrase as string;
+    
     // Configure CDP Wallet Provider
     const config = {
       apiKeyName: process.env.CDP_API_KEY_NAME,
@@ -45,26 +42,26 @@ export async function handlePurchaseAssetsRequest(req: Request, res: Response) {
         /\\n/g,
         "\n"
       ),
-      cdpWalletData: cdpWalletData, // We'll create a new wallet
+      mnemonicPhrase: cdpMnemonicPhrase,
       networkId: process.env.NETWORK_ID || "base-sepolia",
     };
 
     const walletProvider = await CdpWalletProvider.configureWithWallet(config);
-
     const { agent, agentConfig } = await initializeAgent(walletProvider);
 
     const result = await agent.invoke(
       {
         messages: [
           new HumanMessage(
-            `You'll use purchase_assets tool to purchase assets. Here is the purchase order: ${purchaseOrder}`
+            `You'll use purchase_assets tool to purchase assets. Here is the purchase order: ${purchaseOrder}
+            and this is the mnemonic phrase of the wallet: ${cdpMnemonicPhrase}`
           ),
         ],
       },
       agentConfig
     );
 
-    res.json({ status: "ok", result });
+    res.json({ status: "ok" , result });
   } catch (error) {
     console.error("Service error:", error);
     res.status(500).json({ error: "Failed to process request" });
