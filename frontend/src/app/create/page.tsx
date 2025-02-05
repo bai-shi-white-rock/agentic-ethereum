@@ -693,20 +693,6 @@ export default function RiskAssessmentPage() {
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen py-8 px-6">
-      <button
-        onClick={() => {
-          console.log({
-            age,
-            investmentPerMonth,
-            investmentGoal,
-            riskTolerance,
-            pairWiseResponse,
-          });
-        }}
-        className="fixed bottom-4 right-4 px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700"
-      >
-        Debug State
-      </button>
       {page === 1 && agePage()}
       {page === 2 && investmentGoalPage()}
       {page === 3 && investmentPerMonthPage()}
