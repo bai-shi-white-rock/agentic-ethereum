@@ -3,11 +3,6 @@ import { Request, Response } from "express";
 import { CdpWalletProvider } from "@coinbase/agentkit";
 import { initializeAgent } from "../utils/initializedAgent";
 import { HumanMessage } from "@langchain/core/messages";
-import { mnemonicToAccount } from "viem/accounts";
-import { createWalletClient } from "viem";
-import { baseSepolia } from "viem/chains";
-import { http } from "viem";
-import { erc20abi } from "../tools/purchase-assets/erc20abi";
 
 export async function handlePurchaseAssetsRequest(req: Request, res: Response) {
   const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(
@@ -39,29 +34,7 @@ export async function handlePurchaseAssetsRequest(req: Request, res: Response) {
     }
 
     const cdpMnemonicPhrase = userRecords[0].fields.cdpMnemonicPhrase as string;
-
-    // Approve USDC for the exchange contract
-    // somehow CdpWalletProvider is not working, so we need to use viem to do this ;-;
-    const account = mnemonicToAccount(cdpMnemonicPhrase);
-    const client = createWalletClient({
-      account,
-      chain: baseSepolia,
-      transport: http(),
-    });
-
-    const approveResult = await client.writeContract({
-      account,
-      address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-      abi: erc20abi,
-      functionName: "approve",
-      args: [
-        "0x1936e0493A8EBE16dAbb27C2612581B832Cf94EE",
-        BigInt("1000000000000000000"),
-      ],
-    });
-
-    console.log(approveResult);
-
+    
     // Configure CDP Wallet Provider
     const config = {
       apiKeyName: process.env.CDP_API_KEY_NAME,
@@ -74,21 +47,21 @@ export async function handlePurchaseAssetsRequest(req: Request, res: Response) {
     };
 
     const walletProvider = await CdpWalletProvider.configureWithWallet(config);
-
     const { agent, agentConfig } = await initializeAgent(walletProvider);
 
     const result = await agent.invoke(
       {
         messages: [
           new HumanMessage(
-            `You'll use purchase_assets tool to purchase assets. Here is the purchase order: ${purchaseOrder}`
+            `You'll use purchase_assets tool to purchase assets. Here is the purchase order: ${purchaseOrder}
+            and this is the mnemonic phrase of the wallet: ${cdpMnemonicPhrase}`
           ),
         ],
       },
       agentConfig
     );
 
-    res.json({ status: "ok", result });
+    res.json({ status: "ok" , result });
   } catch (error) {
     console.error("Service error:", error);
     res.status(500).json({ error: "Failed to process request" });

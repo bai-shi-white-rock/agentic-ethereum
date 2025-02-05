@@ -1,9 +1,15 @@
 import { z } from "zod";
 import { customActionProvider, EvmWalletProvider } from "@coinbase/agentkit";
 import { investment_assets } from "./investment_asset_list";
-import { encodeFunctionData } from "viem";
-import { abi } from "./abi";
+import { mnemonicToAccount } from "viem/accounts";
+import { createWalletClient, createPublicClient } from "viem";
+import { baseSepolia } from "viem/chains";
+import { http } from "viem";
 import { erc20abi } from "./erc20abi";
+import { abi as exchangeAbi } from "./abi";
+
+const EXCHANGE_CONTRACT_ADDRESS = "0x1936e0493A8EBE16dAbb27C2612581B832Cf94EE";
+const USDC_CONTRACT_ADDRESS = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
 
 const purchaseAssets = customActionProvider<EvmWalletProvider>({
   // wallet types specify which providers can use this action. It can be as generic as WalletProvider or as specific as CdpWalletProvider
@@ -15,68 +21,95 @@ const purchaseAssets = customActionProvider<EvmWalletProvider>({
   `,
   schema: z.object({
     asset: z.string().describe("The asset to purchase"),
-    amount: z.string().describe("The amount of the asset to purchase (wei)"),
+    amount: z.string().describe("The amount to spend (wei)"),
+    mnemonicPhrase: z.string().describe("The mnemonic phrase of the wallet"),
   }),
-  invoke: async (walletProvider, args: any) => {
+  invoke: async (_, args: any) => {
     try {
-      const { asset, amount } = args;
-      // EXCHANGE CONTRACT ADDRESS
-      const contractAddress = "0x1936e0493A8EBE16dAbb27C2612581B832Cf94EE";
+      const { asset, amount, mnemonicPhrase } = args;
 
-      // USDC CONTRACT ADDRESS
-      const usdcContractAddress = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
-
-      // ASSET CONTRACT ADDRESS
-      const assetContractAddress = investment_assets.find(
+      // Get the smart contract address of the asset
+      const ASSET_CONTRACT_ADDRESS = investment_assets.find(
         (_asset) => _asset.ticket === asset
       )?.smart_contract_address;
 
-      if (!assetContractAddress) {
+      if (!ASSET_CONTRACT_ADDRESS) {
         return `Asset not found or not supported: ${asset}`;
       }
-  
-      const usdcAllowance = await walletProvider.readContract({
-        address: usdcContractAddress,
+
+      // somehow CdpWalletProvider is not working, so we need to use viem to do this ;-;
+      const account = mnemonicToAccount(mnemonicPhrase);
+      const publicClient = createPublicClient({
+        chain: baseSepolia,
+        transport: http(),
+      });
+      const client = createWalletClient({
+        account,
+        chain: baseSepolia,
+        transport: http(),
+      });
+
+      // Get exchange rate
+      let exchangeRate = await publicClient.readContract({
+        address: EXCHANGE_CONTRACT_ADDRESS,
+        abi: exchangeAbi,
+        functionName: "getExchangeAmount",
+        args: [
+          USDC_CONTRACT_ADDRESS,
+          ASSET_CONTRACT_ADDRESS as `0x${string}`,
+          BigInt(1),
+        ],
+      });
+
+      // calculate the amount of USDC to spend
+      const usdcToSpendAmount = (BigInt(amount) * exchangeRate);
+
+      // Get the balance of the user
+      const balance = await publicClient.readContract({
+        address: USDC_CONTRACT_ADDRESS,
         abi: erc20abi,
-        functionName: "allowance",
-        args: [walletProvider.getAddress() as `0x${string}`, contractAddress as `0x${string}`],
+        functionName: "balanceOf",
+        args: [account.address],
       });
 
-      console.log(`USDC allowance: ${usdcAllowance}`);
+      if (balance < usdcToSpendAmount) {
+        return `Insufficient balance of USDC: ${balance}; You need to spend ${usdcToSpendAmount} USDC to purchase ${amount} ${asset} tokens. Stop at once!`;
+      }
 
-      /*
-      console.log(`Approving asset... calling ${usdcContractAddress}: ${contractAddress} ${amount} for ${walletProvider.getAddress()}`);
-      const approveHash = await walletProvider.sendTransaction({
-        to: '0x55dbA6e86D5a96cDFAeD3d1a43D9435998006721',
-        data: encodeFunctionData({
-          abi: erc20abi,
-          functionName: "approve",
-          args: [
-            '0x1936e0493A8EBE16dAbb27C2612581B832Cf94EE',
-            BigInt(10000000),
-          ],
-        }),
+      // Set allowance for the asset contract
+      const allowanceHash = await client.writeContract({
+        account,
+        address: USDC_CONTRACT_ADDRESS,
+        abi: erc20abi,
+        functionName: "approve",
+        args: [
+          EXCHANGE_CONTRACT_ADDRESS,
+          BigInt("1000000000000000000"),
+        ],
       });
 
-      await walletProvider.waitForTransactionReceipt(approveHash);
-      */
-
-      const hash = await walletProvider.sendTransaction({
-        to: contractAddress, // Exchange contract address
-        data: encodeFunctionData({
-          abi,
-          functionName: "swap",
-          args: [
-            "0x036cbd53842c5426634e7929541ec2318f3dcf7e", // USDC
-            assetContractAddress as `0x${string}`,
-            amount,
-          ],
-        }),
+      await publicClient.waitForTransactionReceipt({
+        hash: allowanceHash,
       });
 
-      await walletProvider.waitForTransactionReceipt(hash);
+      const swapHash = await client.writeContract({
+        account,
+        address: EXCHANGE_CONTRACT_ADDRESS,
+        abi: exchangeAbi,
+        functionName: "swap",
+        args: [
+          USDC_CONTRACT_ADDRESS,
+          ASSET_CONTRACT_ADDRESS as `0x${string}`,
+          usdcToSpendAmount,
+        ],
+      });
+      
 
-      return `Successfully purchased asset: ${asset}, Amount: ${amount};`;
+      await publicClient.waitForTransactionReceipt({
+        hash: swapHash,
+      });
+
+      return `Successfully purchased asset: ${asset}, Amount: ${amount};`; // Transaction hash: ${swapHash}`;
     } catch (error) {
       console.error(error);
       return `Error: ${error}`;
