@@ -5,7 +5,7 @@ export const investment_assets = [
     category: "Cash Savings",
     description:
       "FDIC-insured savings account offering higher interest rates than traditional accounts",
-    smart_contract_address: "",
+    smart_contract_address: "0x55dbA6e86D5a96cDFAeD3d1a43D9435998006721",
     imageURL: "/assetLogo/savings.png",
     marketCap: "500000",
     "12monthsChange": "+4.5",
@@ -18,7 +18,7 @@ export const investment_assets = [
     category: "Bonds",
     description:
       "Government-backed fixed-income securities with various maturity periods",
-    smart_contract_address: "",
+    smart_contract_address: "0x0525159449e2e90500670d135b56dDB48d241763",
     imageURL: "/assetLogo/treasury.png",
     marketCap: "25000000",
     "12monthsChange": "-2.1",
