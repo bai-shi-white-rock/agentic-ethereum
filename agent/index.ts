@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import * as dotenv from "dotenv";
 import { handleAssetAllocationRequest } from "./service/assetAllocationAI";
+import { handleCreateAIWalletRequest } from "./service/createAIWallet";
+import { handlePurchaseAssetsRequest } from "./service/purchaseAssets";
 
 dotenv.config({ path: ".env.local" });
 
@@ -19,8 +21,18 @@ app.post("/asset-allocation", (req: express.Request, res: express.Response) => {
   handleAssetAllocationRequest(req, res);
 });
 
+// Create a new AI wallet
+app.post(
+  "/create-ai-wallet",
+  async (req: express.Request, res: express.Response) => {
+    await handleCreateAIWalletRequest(req, res);
+  }
+);
+
 // Execute asset purchase
-app.post("/buy-asset");
+app.post("/buy-asset", async (req: express.Request, res: express.Response) => {
+  await handlePurchaseAssetsRequest(req, res);
+});
 
 // Error handling middleware
 app.use(

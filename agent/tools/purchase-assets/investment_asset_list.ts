@@ -254,7 +254,7 @@ export const investment_assets = [
     imageURL: "/assetLogo/global-reit.png",
     marketCap: "5000",
     "12monthsChange": "+7.2",
-    country: "Global",
+    country: "Singapore",
     ticket: "GRT",
   },
 ];
