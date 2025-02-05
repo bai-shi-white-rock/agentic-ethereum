@@ -1,9 +1,21 @@
-import { CdpAgentkit } from "@coinbase/cdp-agentkit-core";
-import { CdpToolkit } from "@coinbase/cdp-langchain";
+import {
+  AgentKit,
+  CdpWalletProvider,
+  wethActionProvider,
+  walletActionProvider,
+  erc20ActionProvider,
+  cdpApiActionProvider,
+  cdpWalletActionProvider,
+  pythActionProvider,
+} from "@coinbase/agentkit";
+
+import { getLangChainTools } from "@coinbase/agentkit-langchain";
 import { HumanMessage } from "@langchain/core/messages";
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
+import purchaseAssets from "./tools/purchase-assets";
+
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as readline from "readline";
@@ -78,18 +90,37 @@ async function initializeAgent() {
       }
     }
 
-    // Configure CDP AgentKit
+    // Configure CDP Wallet Provider
     const config = {
+      apiKeyName: process.env.CDP_API_KEY_NAME,
+      apiKeyPrivateKey: process.env.CDP_API_KEY_PRIVATE_KEY?.replace(/\\n/g, "\n"),
       cdpWalletData: walletDataStr || undefined,
       networkId: process.env.NETWORK_ID || "base-sepolia",
     };
 
-    // Initialize CDP AgentKit
-    const agentkit = await CdpAgentkit.configureWithWallet(config);
+    const walletProvider = await CdpWalletProvider.configureWithWallet(config);
 
-    // Initialize CDP AgentKit Toolkit and get tools
-    const cdpToolkit = new CdpToolkit(agentkit);
-    const tools = cdpToolkit.getTools();
+    // Initialize AgentKit
+    const agentkit = await AgentKit.from({
+      walletProvider,
+      actionProviders: [
+        purchaseAssets,
+        wethActionProvider(),
+        pythActionProvider(),
+        walletActionProvider(),
+        erc20ActionProvider(),
+        cdpApiActionProvider({
+          apiKeyName: process.env.CDP_API_KEY_NAME,
+          apiKeyPrivateKey: process.env.CDP_API_KEY_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+        }),
+        cdpWalletActionProvider({
+          apiKeyName: process.env.CDP_API_KEY_NAME,
+          apiKeyPrivateKey: process.env.CDP_API_KEY_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+        }),
+      ],
+    });
+
+    const tools = await getLangChainTools(agentkit);
 
     // Store buffered conversation history in memory
     const memory = new MemorySaver();
@@ -107,17 +138,14 @@ async function initializeAgent() {
         empowered to interact onchain using your tools. If you ever need funds, you can request them from the 
         faucet if you are on network ID 'base-sepolia'. If not, you can provide your wallet details and request 
         funds from the user. Before executing your first action, get the wallet details to see what network 
-        you're on. If there is a 5XX (internal) HTTP error code, ask the user to try again later. If someone 
-        asks you to do something you can't do with your currently available tools, you must say so, and 
-        encourage them to implement it themselves using the CDP SDK + Agentkit, recommend they go to 
-        docs.cdp.coinbase.com for more information. Be concise and helpful with your responses. Refrain from 
-        restating your tools' descriptions unless it is explicitly requested.
+        you're on. If there is a 5XX (internal) HTTP error code, ask the user to try again later. These tools can
+        be used on any network. eg. purchase_assets, weth_deposit, weth_withdraw, etc.
         `,
     });
 
     // Save wallet data
-    const exportedWallet = await agentkit.exportWallet();
-    fs.writeFileSync(WALLET_DATA_FILE, exportedWallet);
+    const exportedWallet = await walletProvider.exportWallet();
+    fs.writeFileSync(WALLET_DATA_FILE, JSON.stringify(exportedWallet));
 
     return { agent, config: agentConfig };
   } catch (error) {
@@ -128,16 +156,10 @@ async function initializeAgent() {
 
 /**
  * Run the agent autonomously with specified intervals
- *
- * @param agent - The agent executor
- * @param config - Agent configuration
- * @param interval - Time interval between actions in seconds
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function runAutonomousMode(agent: any, config: any, interval = 10) {
   console.log("Starting autonomous mode...");
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
       const thought =
@@ -170,11 +192,7 @@ async function runAutonomousMode(agent: any, config: any, interval = 10) {
 
 /**
  * Run the agent interactively based on user input
- *
- * @param agent - The agent executor
- * @param config - Agent configuration
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function runChatMode(agent: any, config: any) {
   console.log("Starting chat mode... Type 'exit' to end.");
 
@@ -187,7 +205,6 @@ async function runChatMode(agent: any, config: any) {
     new Promise((resolve) => rl.question(prompt, resolve));
 
   try {
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       const userInput = await question("\nPrompt: ");
 
@@ -220,9 +237,7 @@ async function runChatMode(agent: any, config: any) {
 }
 
 /**
- * Choose whether to run in autonomous or chat mode based on user input
- *
- * @returns Selected mode
+ * Choose whether to run in autonomous or chat mode
  */
 async function chooseMode(): Promise<"chat" | "auto"> {
   const rl = readline.createInterface({
@@ -233,7 +248,6 @@ async function chooseMode(): Promise<"chat" | "auto"> {
   const question = (prompt: string): Promise<string> =>
     new Promise((resolve) => rl.question(prompt, resolve));
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     console.log("\nAvailable modes:");
     console.log("1. chat    - Interactive chat mode");
@@ -255,7 +269,7 @@ async function chooseMode(): Promise<"chat" | "auto"> {
 }
 
 /**
- * Start the chatbot agent
+ * Main entry point
  */
 async function main() {
   try {
@@ -275,6 +289,7 @@ async function main() {
   }
 }
 
+// Start the agent when running directly
 if (require.main === module) {
   console.log("Starting Agent...");
   main().catch((error) => {
