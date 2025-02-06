@@ -144,7 +144,7 @@ export default function CreatePage() {
       pairWiseResponse,
     };
     try {
-      // First call the asset allocation API
+      // Call the asset allocation API
       const assetAllocationResponse = await fetch("/api/asset-allocation", {
         method: "POST",
         headers: {
@@ -170,35 +170,12 @@ export default function CreatePage() {
 
       console.log("Suggested asset allocation", assetAllocationData);
       setAssetAllocation(assetAllocationData);
-
-      // Then save to Airtable
-      const response = await fetch("/api/save-airtable", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          address,
-          investmentPerMonth,
-          summaryRiskPreference,
-          assetAllocationData,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setPage(7);
-      } else {
-        console.error("Failed to submit risk assessment:", data.message);
-        alert(
-          data.message || "Failed to submit risk assessment. Please try again."
-        );
-      }
+      setPage(7);
+      
     } catch (error) {
-      console.error("Error submitting risk assessment:", error);
+      console.error("Error getting asset allocation:", error);
       alert(
-        "An error occurred while submitting your risk assessment. Please try again."
+        "An error occurred while getting asset allocation. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -211,6 +188,9 @@ export default function CreatePage() {
 
     // Call API to buy assets
     buyAssetAPI();
+
+    // save the transaction to the database
+    saveTransactionToAirtable();
   };
 
   const createAIWalletAPI = async () => {
@@ -279,11 +259,47 @@ export default function CreatePage() {
       const buyAssetData = await buyAssetResponse.json();
       console.log("Assets purchased successfully", buyAssetData);
       alert("Assets purchased successfully!");
-      router.push('/dashboard');
       
     } catch (error) {
       console.error("Error buying assets:", error);
       alert("An error occurred while buying assets. Please try again.");
+    }
+  };
+
+  const saveTransactionToAirtable = async () => {
+    // save the transaction to the database
+    try {
+      const airtableResponse = await fetch("/api/save-airtable", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          address,
+          investmentPerMonth,
+          summaryRiskPreference: {
+            age,
+            investmentPerMonth,
+            investmentGoal,
+            riskTolerance,
+            pairWiseResponse,
+          },
+          assetAllocation,
+        }),
+      });
+
+      const airtableData = await airtableResponse.json();
+      if (!airtableData.success) {
+        console.error("Failed to save transaction:", airtableData.message);
+        alert(airtableData.message || "Failed to save transaction. Please try again.");
+        return;
+      }
+
+      console.log("Transaction saved successfully");
+      router.push('/dashboard');
+    } catch (error) {
+      console.error("Error saving transaction:", error);
+      alert("An error occurred while saving the transaction. Please try again.");
     }
   };
 
