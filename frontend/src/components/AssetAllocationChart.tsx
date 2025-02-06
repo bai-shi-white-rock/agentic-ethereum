@@ -64,7 +64,7 @@ export function AssetAllocationChart({
       <CardHeader className="items-center pb-0">
         <CardTitle>Asset Allocation</CardTitle>
         <CardDescription>
-          Your investment distribution. We let the leading-edge AI model to choose the best assets based on modern portfolio theory that optimize your portfolio for your risk tolerance and investment goals.
+          We let the leading-edge AI model to choose the best assets based on modern portfolio theory that optimize your portfolio for your risk tolerance and investment goals.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">

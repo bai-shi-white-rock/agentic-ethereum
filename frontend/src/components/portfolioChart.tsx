@@ -1,5 +1,4 @@
-import { TrendingUp } from "lucide-react"
-import { CartesianGrid, Line, LineChart, XAxis, YAxis, ResponsiveContainer } from "recharts"
+import { CartesianGrid, Bar, XAxis, YAxis, ResponsiveContainer, BarChart } from "recharts"
 import {
   Card,
   CardContent,
@@ -20,43 +19,34 @@ interface PortfolioDataPoint {
   portfolioValue: number;
 }
 
-const chartData: PortfolioDataPoint[] = [
-  { date: "2024-01", portfolioValue: 10000 },
-  { date: "2024-02", portfolioValue: 10450 },
-  { date: "2024-03", portfolioValue: 10200 },
-  { date: "2024-04", portfolioValue: 11100 },
-  { date: "2024-05", portfolioValue: 11500 },
-  { date: "2024-06", portfolioValue: 12300 },
-]
-
 const chartConfig = {
   portfolioValue: {
     label: "Portfolio Value",
-    color: "#22c55e", // Green color for finance
+    color: "#424874", // Green color for finance
   },
 } satisfies ChartConfig
 
-const calculatePerformance = (): number => {
-  const firstValue = chartData[0].portfolioValue;
-  const lastValue = chartData[chartData.length - 1].portfolioValue;
-  const percentageChange = ((lastValue - firstValue) / firstValue) * 100;
-  return Number(percentageChange.toFixed(1));
+interface PortfolioChartProps {
+  portfolioValue: number;
 }
 
-export default function PortfolioChart() {
-  const performanceChange = calculatePerformance();
+export default function PortfolioChart({ portfolioValue }: PortfolioChartProps) {
+  // Create chart data using the current portfolio value
+  const chartData: PortfolioDataPoint[] = [
+    { date: new Date().toISOString().slice(0, 7), portfolioValue: portfolioValue }
+  ];
   
   return (
     <Card className="w-full my-8">
       <CardHeader>
         <CardTitle>Portfolio Performance</CardTitle>
-        <CardDescription>+{performanceChange}% total return</CardDescription>
+        <CardDescription>${portfolioValue.toLocaleString()}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <ChartContainer config={chartConfig}>
-              <LineChart
+              <BarChart
                 data={chartData}
                 margin={{
                   left: 12,
@@ -86,27 +76,16 @@ export default function PortfolioChart() {
                   cursor={false}
                   content={<ChartTooltipContent hideLabel />}
                 />
-                <Line
-                  type="monotone"
+                <Bar
                   dataKey="portfolioValue"
-                  stroke="var(--color-portfolioValue)"
-                  strokeWidth={2}
-                  dot={false}
+                  fill="var(--color-portfolioValue)"
+                  radius={[4, 4, 0, 0]}
                 />
-              </LineChart>
+              </BarChart>
             </ChartContainer>
           </ResponsiveContainer>
         </div>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          {performanceChange > 0 ? "Up" : "Down"} {Math.abs(performanceChange)}% since January 
-          <TrendingUp className={`h-4 w-4 ${performanceChange > 0 ? 'text-green-500' : 'text-red-500'}`} />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Showing portfolio value over the last 6 months
-        </div>
-      </CardFooter>
     </Card>
   )
 }

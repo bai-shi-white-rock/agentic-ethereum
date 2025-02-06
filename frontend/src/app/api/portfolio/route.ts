@@ -28,7 +28,7 @@ interface GraphQLResponse {
 interface InvestmentPlan {
   id: string;
   totalInvestment: number;
-  assetAllocation: string;
+  assetAllocation: Record<string, string>;
   investmentPerMonth: number;
   createdAt: string;
 }
@@ -118,8 +118,7 @@ export async function GET(request: Request) {
                 const plan = await base(INVESTMENT_PLANS_TABLE).find(recordId);
                 return {
                     id: plan.id,
-                    totalInvestment: Number(plan.get('totalInvestment')) || 0,
-                    assetAllocation: String(plan.get('assetAllocation')),
+                    assetAllocation: JSON.parse(String(plan.get('assetAllocation')) || '{}'),
                     investmentPerMonth: Number(plan.get('investmentPerMonth')) || 0,
                     createdAt: String(plan.get('createdAt'))
                 } as InvestmentPlan;
