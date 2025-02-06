@@ -203,7 +203,10 @@ export default function RiskAssessmentPage() {
 
   const handleBuyAssets = async () => {
     console.log("Confirm buying asset allocation");
-    // Call API to agent here
+    // Call API to create a wallet  /create-ai-wallet
+
+    // Call API to buy assets  /buy-asset
+
   };
 
   const ConfirmButton = () => (
