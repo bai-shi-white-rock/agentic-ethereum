@@ -6,7 +6,7 @@ import { investment_assets } from "@/utils/investment_asset_list";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { AssetAllocationChart } from "@/components/AssetAllocationChart";
 import { useRouter } from "next/navigation";
-
+import { usePayWithETH } from "@/utils/PayWithETH";
 
 interface Choice {
   name: string;
@@ -19,10 +19,10 @@ interface Choice {
 
 export default function CreatePage() {
   const router = useRouter();
-  const { address } = useAppKitAccount();
+  const { address, isConnected } = useAppKitAccount();
   const [page, setPage] = useState(1);
   const [age, setAge] = useState("");
-  const [investmentPerMonth, setInvestmentPerMonth] = useState("");
+  const [investmentPerMonth, setInvestmentPerMonth] = useState(0);
   const [investmentGoal, setInvestmentGoal] = useState("");
   const [riskTolerance, setRiskTolerance] = useState("");
   const [pairWiseResponse, setPairWiseResponse] = useState<
@@ -55,7 +55,6 @@ export default function CreatePage() {
   const [selectedChoice, setSelectedChoice] = useState<string>("");
   const [questionIndex, setQuestionIndex] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [AIWalletAddress, setAIWalletAddress] = useState<string>("");
   const [assetAllocation, setAssetAllocation] = useState<
     Record<string, string | number>
   >({
@@ -65,6 +64,10 @@ export default function CreatePage() {
     "Vanguard S&P 500 ETF": 10,
     "Fidelity Total Market Index Fund": 30,
   });
+  const { payWithETH, isConfirming, isConfirmed } = usePayWithETH();
+
+
+  // helper functions
   const getRandomNumber = () => {
     return Math.floor(Math.random() * 20);
   };
@@ -77,6 +80,8 @@ export default function CreatePage() {
     } while (second === first);
     return [first, second];
   };
+
+
 
   useEffect(() => {
     const [firstIndex, secondIndex] = getTwoUniqueRandomNumbers();
@@ -180,21 +185,30 @@ export default function CreatePage() {
   };
 
   const handleBuyAssets = async () => {
-    // create a wallet
-    createAIWalletAPI();
+    try {
+      // get the AI wallet address for this user
+      const walletAddress = await getAIWalletAddress();
+      if (!walletAddress || !isConnected) {
+        alert("Please connect your wallet first");
+        return; // Exit if no wallet address was returned
+      }
 
-    // pay with USDC
-    payWithUSDC();
+      // pay with ETH using the returned wallet address
+      await payWithETH(walletAddress, investmentPerMonth);
 
-    // Call API to buy assets
-    buyAssetAPI();
+      // Call API to buy assets
+      await buyAssetAPI();
 
-    // save the transaction to the database
-    saveTransactionToAirtable();
+      // save the transaction to the database
+      await saveTransactionToAirtable();
+    } catch (error) {
+      console.error("Error in handleBuyAssets:", error);
+      alert("An error occurred while processing your purchase. Please try again.");
+    }
   };
 
-  const createAIWalletAPI = async () => {
-    if (isLoading) return;
+  const getAIWalletAddress = async () => {
+    if (isLoading) return null;
     
     // create a wallet
     try {
@@ -202,7 +216,7 @@ export default function CreatePage() {
       
       if (!address) {
         alert("Please connect your wallet first");
-        return;
+        return null;
       }
 
       const createWalletResponse = await fetch('/api/create-ai-wallet', {
@@ -215,29 +229,23 @@ export default function CreatePage() {
         }),
       });
 
-      const AIWalletAddress = await createWalletResponse.json();
+      const AIWalletAddressFromAPI = await createWalletResponse.json();
       
       if (!createWalletResponse.ok) {
-        console.error("Failed to create AI wallet:", AIWalletAddress.error);
-        alert(AIWalletAddress.error || "Failed to create AI wallet. Please try again.");
-        return;
+        console.error("Failed to create AI wallet:", AIWalletAddressFromAPI.error);
+        alert(AIWalletAddressFromAPI.error || "Failed to create AI wallet. Please try again.");
+        return null;
       }
-
-      setAIWalletAddress(AIWalletAddress);
-      console.log("AI wallet created successfully", AIWalletAddress);
-      alert("AI wallet created successfully!");
+      console.log("AI wallet created successfully", AIWalletAddressFromAPI);
+      return AIWalletAddressFromAPI; // Return the wallet address directly
       
     } catch (error) {
       console.error("Error creating AI wallet:", error);
       alert("An error occurred while creating your AI wallet. Please try again.");
+      return null;
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const payWithUSDC = async () => {
-    
-    
   };
   
 
@@ -577,7 +585,7 @@ export default function CreatePage() {
               onChange={(e) => {
                 const value = e.target.value;
                 if (parseInt(value) >= 0) {
-                  setInvestmentPerMonth(value);
+                  setInvestmentPerMonth(parseInt(value));
                 }
               }}
               placeholder="Enter amount"
@@ -645,6 +653,8 @@ export default function CreatePage() {
           <div className="flex justify-center gap-4 mb-8">
             <CancelOrderButton />
             <ConfirmRiskAssessmentButton />
+            {isConfirming && <div>Waiting for confirmation...</div>}
+            {isConfirmed && <div>Transaction confirmed.</div>}
           </div>
 
           <div className="flex gap-8 items-start">
