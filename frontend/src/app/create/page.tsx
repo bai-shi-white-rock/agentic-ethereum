@@ -7,6 +7,7 @@ import { useAppKitAccount } from "@reown/appkit/react";
 import { AssetAllocationChart } from "@/components/AssetAllocationChart";
 import { useRouter } from "next/navigation";
 
+
 interface Choice {
   name: string;
   description: string;
