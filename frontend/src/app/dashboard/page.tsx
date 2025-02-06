@@ -6,7 +6,7 @@ import { ArrowRight, Plus, ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import PortfolioChart from "@/components/portfolioChart";
-import { DonutChart } from "@/components/donutChart";
+import { AssetAllocationChart } from "@/components/AssetAllocationChart";
 
 interface RateSet {
   id: string;
@@ -28,8 +28,7 @@ interface TokenSwapped {
 
 interface InvestmentPlan {
   id: string;
-  totalInvestment: number;
-  assetAllocation: string;
+  assetAllocation: Record<string, string>;
   investmentPerMonth: number;
   createdAt: string;
 }
@@ -102,8 +101,8 @@ export default function DashboardPage() {
               </Button>
             </div>
             <div className="flex flex-col gap-4">
-              <PortfolioChart />
-              <DonutChart />
+              <PortfolioChart portfolioValue={portfolioValue} />
+              <AssetAllocationChart allocation={investmentPlans[0].assetAllocation} />
             </div>
           </div>
         ) : (
@@ -171,21 +170,36 @@ export default function DashboardPage() {
                             </div>
                             <div className="text-right">
                               <p className="font-bold">
-                                ${plan.totalInvestment.toLocaleString()}
+                                ${plan.investmentPerMonth.toLocaleString()}
                               </p>
                               <p className="text-sm text-gray-500">
-                                Total Investment
+                                 Investment amount
                               </p>
                             </div>
                           </div>
-                          <div className="mt-2 text-sm">
-                            <p className="text-gray-600">
-                              Asset Allocation: {plan.assetAllocation}
-                            </p>
+                          <div className="mt-2">
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-sm">
+                                <thead>
+                                  <tr>
+                                    <th className="text-left py-2 px-4 bg-gray-100 font-medium text-gray-600">Asset</th>
+                                    <th className="text-right py-2 px-4 bg-gray-100 font-medium text-gray-600">Allocation</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {Object.entries(plan.assetAllocation).map(([asset, percentage]) => (
+                                    <tr key={asset} className="border-t border-gray-100">
+                                      <td className="text-left py-2 px-4 text-gray-800">{asset}</td>
+                                      <td className="text-right py-2 px-4 text-gray-800">{percentage}%</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
                           </div>
                           <div className="mt-4">
                             <Button
-                              className="w-full bg-primary text-white my-4"
+                              className="w-full bg-gray-600 text-white my-4"
                               onClick={() => {
                                 alert("This feature is not available yet in the hackathon. Coming soon!");
                               }}
