@@ -144,6 +144,34 @@ export default function CreatePage() {
       pairWiseResponse,
     };
     try {
+      // First call the asset allocation API
+      const assetAllocationResponse = await fetch("/api/asset-allocation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          data: summaryRiskPreference,
+        }),
+      });
+      const assetAllocationData = await assetAllocationResponse.json();
+      
+      if (!assetAllocationResponse.ok) {
+        console.error(
+          "Failed to submit asset allocation:",
+          assetAllocationData.message
+        );
+        alert(
+          assetAllocationData.message ||
+            "Failed to submit asset allocation. Please try again."
+        );
+        return;
+      }
+
+      console.log("Suggested asset allocation", assetAllocationData);
+      setAssetAllocation(assetAllocationData);
+
+      // Then save to Airtable
       const response = await fetch("/api/save-airtable", {
         method: "POST",
         headers: {
@@ -153,38 +181,14 @@ export default function CreatePage() {
           address,
           investmentPerMonth,
           summaryRiskPreference,
+          assetAllocationData,
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        // Now call the asset allocation API after the risk assessment is successful.
-        const assetAllocationResponse = await fetch("/api/asset-allocation", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            data: summaryRiskPreference,
-          }),
-        });
-        const assetAllocationData = await assetAllocationResponse.json();
-        if (assetAllocationResponse.ok) {
-          console.log("Suggested asset allocation", assetAllocationData);
-          // Mock first - Use real data after the API is ready
-          setAssetAllocation(assetAllocationData);
-          setPage(7);
-        } else {
-          console.error(
-            "Failed to submit asset allocation:",
-            assetAllocationData.message
-          );
-          alert(
-            assetAllocationData.message ||
-              "Failed to submit asset allocation. Please try again."
-          );
-        }
+        setPage(7);
       } else {
         console.error("Failed to submit risk assessment:", data.message);
         alert(

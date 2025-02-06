@@ -13,9 +13,9 @@ interface AirtableError {
 
 export async function POST(request: Request) {
   try {
-    const { address, investmentPerMonth, summaryRiskPreference } = await request.json()
+    const { address, investmentPerMonth, summaryRiskPreference, assetAllocationData } = await request.json()
     
-    if (!address || !investmentPerMonth || !summaryRiskPreference) {
+    if (!address || !investmentPerMonth || !summaryRiskPreference || !assetAllocationData) {
       return NextResponse.json(
         { success: false, message: 'Missing required fields' },
         { status: 400 }
@@ -45,7 +45,8 @@ export async function POST(request: Request) {
         fields: {
           users: [userRecordId],
           investmentPerMonth: parseInt(investmentPerMonth),
-          riskPreference: JSON.stringify(summaryRiskPreference)
+          riskPreference: JSON.stringify(summaryRiskPreference),
+          assetAllocation: JSON.stringify(assetAllocationData),
         }
       }
     ]);
