@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Lottie from "lottie-react";
-import baishiMonster from "../../../public/lottie/baishi_monster.json";
+import baishiMonster from "../../../public/lottie/baishi_monster2.json";
 import { Loader2 } from "lucide-react";
 
 export default function Login() {

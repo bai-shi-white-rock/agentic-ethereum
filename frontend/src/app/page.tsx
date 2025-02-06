@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Lottie from "lottie-react";
-import baishiMonster from "../../public/lottie/baishi_monster.json";
+import baishiMonster from "../../public/lottie/baishi_monster2.json";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Percent, Globe, UserCog } from "lucide-react";
@@ -40,7 +40,12 @@ export default function Home() {
       {/* AUM Section */}
       <div className="w-full bg-secondary/5 py-16 mt-16">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-8">Assets Under Management</h2>
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold">Assets Under Management</h2>
+            <p className="text-gray-400 font-extralight text-sm">
+              Numbers are made up but it will be true soon
+            </p>
+          </div>
           <div className="flex justify-center items-center space-x-12">
             <div className="text-center">
               <p className="text-4xl font-bold text-primary mb-2">$142M+</p>

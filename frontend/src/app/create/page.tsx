@@ -54,6 +54,7 @@ export default function CreatePage() {
   const [selectedChoice, setSelectedChoice] = useState<string>("");
   const [questionIndex, setQuestionIndex] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [AIWalletAddress, setAIWalletAddress] = useState<string>("");
   const [assetAllocation, setAssetAllocation] = useState<
     Record<string, string | number>
   >({
@@ -101,15 +102,11 @@ export default function CreatePage() {
   }, []);
 
   const nextPage = () => {
-    if (page < 6) {
-      setPage(page + 1);
-    }
+    setPage(page + 1);
   };
 
   const prevPage = () => {
-    if (page > 1) {
-      setPage(page - 1);
-    }
+    setPage(page - 1);
   };
 
   const PreviousButton = () => (
@@ -171,7 +168,6 @@ export default function CreatePage() {
       console.log("Suggested asset allocation", assetAllocationData);
       setAssetAllocation(assetAllocationData);
       setPage(7);
-      
     } catch (error) {
       console.error("Error getting asset allocation:", error);
       alert(
@@ -185,6 +181,9 @@ export default function CreatePage() {
   const handleBuyAssets = async () => {
     // create a wallet
     createAIWalletAPI();
+
+    // pay with USDC
+    payWithUSDC();
 
     // Call API to buy assets
     buyAssetAPI();
@@ -215,15 +214,16 @@ export default function CreatePage() {
         }),
       });
 
-      const walletData = await createWalletResponse.json();
+      const AIWalletAddress = await createWalletResponse.json();
       
       if (!createWalletResponse.ok) {
-        console.error("Failed to create AI wallet:", walletData.error);
-        alert(walletData.error || "Failed to create AI wallet. Please try again.");
+        console.error("Failed to create AI wallet:", AIWalletAddress.error);
+        alert(AIWalletAddress.error || "Failed to create AI wallet. Please try again.");
         return;
       }
 
-      console.log("AI wallet created successfully", walletData);
+      setAIWalletAddress(AIWalletAddress);
+      console.log("AI wallet created successfully", AIWalletAddress);
       alert("AI wallet created successfully!");
       
     } catch (error) {
@@ -232,6 +232,11 @@ export default function CreatePage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const payWithUSDC = async () => {
+    
+    
   };
   
 

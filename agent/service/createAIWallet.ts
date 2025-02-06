@@ -32,9 +32,9 @@ export async function handleCreateAIWalletRequest(req: Request, res: Response) {
       });
     }
 
-    if (userRecords[0].fields.cdpMnemonicPhrase) {
-      return res.status(400).json({
-        error: "Wallet already has an AI wallet",
+    if (userRecords[0].fields.agentWalletAddress) {
+      return res.status(200).json({
+        agentWalletAddress: userRecords[0].fields.agentWalletAddress
       });
     }
 
@@ -72,7 +72,7 @@ export async function handleCreateAIWalletRequest(req: Request, res: Response) {
       throw new Error("Failed to create record in Airtable");
     }
 
-    res.json({ status: "ok" });
+    res.json({ agentWalletAddress: walletProvider.getAddress() });
   } catch (error) {
     console.error("Service error:", error);
     res.status(500).json({ error: "Failed to process request" });
