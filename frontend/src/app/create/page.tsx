@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import PairWisePage from "@/components/PairWisePage";
 import { investment_assets } from "@/utils/investment_asset_list";
-import { useRouter } from "next/navigation";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { AssetAllocationChart } from "@/components/AssetAllocationChart";
 
@@ -17,7 +16,6 @@ interface Choice {
 }
 
 export default function RiskAssessmentPage() {
-  const router = useRouter();
   const { address } = useAppKitAccount();
   const [page, setPage] = useState(1);
   const [age, setAge] = useState("");
@@ -202,11 +200,84 @@ export default function RiskAssessmentPage() {
   };
 
   const handleBuyAssets = async () => {
-    console.log("Confirm buying asset allocation");
-    // Call API to create a wallet  /create-ai-wallet
+    // create a wallet
+    createAIWalletAPI();
 
-    // Call API to buy assets  /buy-asset
+    // Call API to buy assets
+    buyAssetAPI();
+  };
 
+  const createAIWalletAPI = async () => {
+    if (isLoading) return;
+    
+    // create a wallet
+    try {
+      setIsLoading(true);
+      
+      if (!address) {
+        alert("Please connect your wallet first");
+        return;
+      }
+
+      const createWalletResponse = await fetch('/api/create-ai-wallet', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          walletAddress: address,
+        }),
+      });
+
+      const walletData = await createWalletResponse.json();
+      
+      if (!createWalletResponse.ok) {
+        console.error("Failed to create AI wallet:", walletData.error);
+        alert(walletData.error || "Failed to create AI wallet. Please try again.");
+        return;
+      }
+
+      console.log("AI wallet created successfully", walletData);
+      alert("AI wallet created successfully!");
+      
+    } catch (error) {
+      console.error("Error creating AI wallet:", error);
+      alert("An error occurred while creating your AI wallet. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+
+  const buyAssetAPI = async () => {
+    // Call API to buy assets
+    try {
+      const buyAssetResponse = await fetch("/api/buy-asset", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          walletAddress: address,
+          purchaseOrder: assetAllocation,
+        }),
+      });
+
+      if (!buyAssetResponse.ok) {
+        const errorData = await buyAssetResponse.json();
+        console.error("Failed to buy assets:", errorData);
+        alert(errorData.error || "Failed to buy assets. Please try again.");
+        return;
+      }
+
+      const buyAssetData = await buyAssetResponse.json();
+      console.log("Assets purchased successfully", buyAssetData);
+      alert("Assets purchased successfully!");
+      
+    } catch (error) {
+      console.error("Error buying assets:", error);
+      alert("An error occurred while buying assets. Please try again.");
+    }
   };
 
   const ConfirmButton = () => (
@@ -220,6 +291,7 @@ export default function RiskAssessmentPage() {
       {isLoading ? "Submitting..." : "Confirm"}
     </button>
   );
+
 
   const BuyAssetButton = () => (
     <button
