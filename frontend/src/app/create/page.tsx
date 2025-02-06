@@ -5,6 +5,7 @@ import PairWisePage from "@/components/PairWisePage";
 import { investment_assets } from "@/utils/investment_asset_list";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { AssetAllocationChart } from "@/components/AssetAllocationChart";
+import { useRouter } from "next/navigation";
 
 interface Choice {
   name: string;
@@ -15,7 +16,8 @@ interface Choice {
   country: string;
 }
 
-export default function RiskAssessmentPage() {
+export default function CreatePage() {
+  const router = useRouter();
   const { address } = useAppKitAccount();
   const [page, setPage] = useState(1);
   const [age, setAge] = useState("");
@@ -130,7 +132,7 @@ export default function RiskAssessmentPage() {
     </button>
   );
 
-  const confirm = async () => {
+  const confirmRiskAssessment = async () => {
     if (isLoading) return;
 
     setIsLoading(true);
@@ -142,7 +144,7 @@ export default function RiskAssessmentPage() {
       pairWiseResponse,
     };
     try {
-      const response = await fetch("/api/risk-assessment", {
+      const response = await fetch("/api/save-airtable", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -273,6 +275,7 @@ export default function RiskAssessmentPage() {
       const buyAssetData = await buyAssetResponse.json();
       console.log("Assets purchased successfully", buyAssetData);
       alert("Assets purchased successfully!");
+      router.push('/dashboard');
       
     } catch (error) {
       console.error("Error buying assets:", error);
@@ -280,9 +283,9 @@ export default function RiskAssessmentPage() {
     }
   };
 
-  const ConfirmButton = () => (
+  const ConfirmRiskAssessmentButton = () => (
     <button
-      onClick={confirm}
+      onClick={confirmRiskAssessment}
       disabled={isLoading}
       className={`px-4 py-2 bg-primary text-white rounded-md disabled:opacity-50 ${
         isLoading ? "cursor-not-allowed" : "hover:bg-secondary"
@@ -605,7 +608,7 @@ export default function RiskAssessmentPage() {
     );
   };
 
-  const confirmPage = () => {
+  const confirmRiskAssessmentPage = () => {
     return (
       <div className="max-w-6xl mx-auto p-6">
         <h1 className="text-2xl font-bold mb-6 text-gray-800 text-center">
@@ -614,8 +617,8 @@ export default function RiskAssessmentPage() {
         <div className="flex flex-col">
           {/* Top Buttons */}
           <div className="flex justify-center gap-4 mb-8">
-            <PreviousButton />
-            <ConfirmButton />
+            <CancelOrderButton />
+            <ConfirmRiskAssessmentButton />
           </div>
 
           <div className="flex gap-8 items-start">
@@ -703,7 +706,8 @@ export default function RiskAssessmentPage() {
         <div className="flex justify-center">
           <AssetAllocationChart allocation={assetAllocation} />
         </div>
-        <div className="flex justify-center">
+        <div className="flex justify-center gap-4">
+          <CancelOrderButton />
           <BuyAssetButton />
         </div>
       </div>
@@ -766,6 +770,14 @@ export default function RiskAssessmentPage() {
     });
   };
 
+  const CancelOrderButton = () => {
+    return (
+      <button onClick={() => router.push("/dashboard")} className="bg-red-500 text-white px-4 py-2 rounded-md">
+        Cancel Order
+      </button>
+    );
+  };
+
   return (
     <div className="flex flex-col items-center justify-start min-h-screen py-8 px-6">
       {page === 1 && agePage()}
@@ -786,7 +798,7 @@ export default function RiskAssessmentPage() {
           setQuestionIndex={setQuestionIndex}
         />
       )}
-      {page === 6 && confirmPage()}
+      {page === 6 && confirmRiskAssessmentPage()}
       {page === 7 && confirmAssetAllocationPage()}
     </div>
   );
