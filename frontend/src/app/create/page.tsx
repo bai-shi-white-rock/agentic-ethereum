@@ -6,6 +6,7 @@ import { investment_assets } from "@/utils/investment_asset_list";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { AssetAllocationChart } from "@/components/AssetAllocationChart";
 import { useRouter } from "next/navigation";
+import { usePayWithUSDC } from "@/utils/PayWithUSDC";
 
 interface Choice {
   name: string;
@@ -21,7 +22,7 @@ export default function CreatePage() {
   const { address } = useAppKitAccount();
   const [page, setPage] = useState(1);
   const [age, setAge] = useState("");
-  const [investmentPerMonth, setInvestmentPerMonth] = useState("");
+  const [investmentPerMonth, setInvestmentPerMonth] = useState(0);
   const [investmentGoal, setInvestmentGoal] = useState("");
   const [riskTolerance, setRiskTolerance] = useState("");
   const [pairWiseResponse, setPairWiseResponse] = useState<
@@ -63,6 +64,10 @@ export default function CreatePage() {
     "Vanguard S&P 500 ETF": 10,
     "Fidelity Total Market Index Fund": 30,
   });
+  const { payWithUSDC, isConfirming, isConfirmed } = usePayWithUSDC();
+
+
+  // helper functions
   const getRandomNumber = () => {
     return Math.floor(Math.random() * 20);
   };
@@ -75,6 +80,8 @@ export default function CreatePage() {
     } while (second === first);
     return [first, second];
   };
+
+
 
   useEffect(() => {
     const [firstIndex, secondIndex] = getTwoUniqueRandomNumbers();
@@ -101,15 +108,11 @@ export default function CreatePage() {
   }, []);
 
   const nextPage = () => {
-    if (page < 6) {
-      setPage(page + 1);
-    }
+    setPage(page + 1);
   };
 
   const prevPage = () => {
-    if (page > 1) {
-      setPage(page - 1);
-    }
+    setPage(page - 1);
   };
 
   const PreviousButton = () => (
@@ -171,7 +174,6 @@ export default function CreatePage() {
       console.log("Suggested asset allocation", assetAllocationData);
       setAssetAllocation(assetAllocationData);
       setPage(7);
-      
     } catch (error) {
       console.error("Error getting asset allocation:", error);
       alert(
@@ -183,18 +185,28 @@ export default function CreatePage() {
   };
 
   const handleBuyAssets = async () => {
-    // create a wallet
-    createAIWalletAPI();
+    try {
+      // get the AI wallet address for this user
+      const AIWalletAddress = await getAIWalletAddress();
 
-    // Call API to buy assets
-    buyAssetAPI();
+      // transfer USDC to the AI wallet
+      await payWithUSDC(AIWalletAddress, investmentPerMonth);
 
-    // save the transaction to the database
-    saveTransactionToAirtable();
+      if (isConfirmed) {
+        // Call API to buy assets
+        await buyAssetAPI();
+
+        // save the transaction to the database
+        await saveTransactionToAirtable();
+      }
+    } catch (error) {
+      console.error("Error in handleBuyAssets:", error);
+      alert("An error occurred while processing your purchase. Please try again.");
+    }
   };
 
-  const createAIWalletAPI = async () => {
-    if (isLoading) return;
+  const getAIWalletAddress = async () => {
+    if (isLoading) return null;
     
     // create a wallet
     try {
@@ -202,7 +214,7 @@ export default function CreatePage() {
       
       if (!address) {
         alert("Please connect your wallet first");
-        return;
+        return null;
       }
 
       const createWalletResponse = await fetch('/api/create-ai-wallet', {
@@ -215,20 +227,20 @@ export default function CreatePage() {
         }),
       });
 
-      const walletData = await createWalletResponse.json();
+      const AIWalletAddressFromAPI = await createWalletResponse.json();
       
       if (!createWalletResponse.ok) {
-        console.error("Failed to create AI wallet:", walletData.error);
-        alert(walletData.error || "Failed to create AI wallet. Please try again.");
-        return;
+        console.error("Failed to create AI wallet:", AIWalletAddressFromAPI.error);
+        alert(AIWalletAddressFromAPI.error || "Failed to create AI wallet. Please try again.");
+        return null;
       }
-
-      console.log("AI wallet created successfully", walletData);
-      alert("AI wallet created successfully!");
+      console.log("AI wallet created successfully", AIWalletAddressFromAPI.agentWalletAddress);
+      return AIWalletAddressFromAPI.agentWalletAddress; // Return the wallet address directly
       
     } catch (error) {
       console.error("Error creating AI wallet:", error);
       alert("An error occurred while creating your AI wallet. Please try again.");
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -570,13 +582,14 @@ export default function CreatePage() {
               value={investmentPerMonth}
               onChange={(e) => {
                 const value = e.target.value;
-                if (parseInt(value) >= 0) {
-                  setInvestmentPerMonth(value);
+                if (parseFloat(value) >= 0) {
+                  setInvestmentPerMonth(parseFloat(value));
                 }
               }}
               placeholder="Enter amount"
               className="w-full p-3 pl-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               min="0"
+              step="0.01"
               required
             />
           </div>
