@@ -6,7 +6,7 @@ import { investment_assets } from "@/utils/investment_asset_list";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { AssetAllocationChart } from "@/components/AssetAllocationChart";
 import { useRouter } from "next/navigation";
-import { usePayWithETH } from "@/utils/PayWithETH";
+import { usePayWithUSDC } from "@/utils/PayWithUSDC";
 
 interface Choice {
   name: string;
@@ -19,7 +19,7 @@ interface Choice {
 
 export default function CreatePage() {
   const router = useRouter();
-  const { address, isConnected } = useAppKitAccount();
+  const { address } = useAppKitAccount();
   const [page, setPage] = useState(1);
   const [age, setAge] = useState("");
   const [investmentPerMonth, setInvestmentPerMonth] = useState(0);
@@ -64,7 +64,7 @@ export default function CreatePage() {
     "Vanguard S&P 500 ETF": 10,
     "Fidelity Total Market Index Fund": 30,
   });
-  const { payWithETH, isConfirming, isConfirmed } = usePayWithETH();
+  const { payWithUSDC, isConfirming, isConfirmed } = usePayWithUSDC();
 
 
   // helper functions
@@ -187,20 +187,18 @@ export default function CreatePage() {
   const handleBuyAssets = async () => {
     try {
       // get the AI wallet address for this user
-      const walletAddress = await getAIWalletAddress();
-      if (!walletAddress || !isConnected) {
-        alert("Please connect your wallet first");
-        return; // Exit if no wallet address was returned
+      const AIWalletAddress = await getAIWalletAddress();
+
+      // transfer USDC to the AI wallet
+      await payWithUSDC(AIWalletAddress, investmentPerMonth);
+
+      if (isConfirmed) {
+        // Call API to buy assets
+        await buyAssetAPI();
+
+        // save the transaction to the database
+        await saveTransactionToAirtable();
       }
-
-      // pay with ETH using the returned wallet address
-      await payWithETH(walletAddress, investmentPerMonth);
-
-      // Call API to buy assets
-      await buyAssetAPI();
-
-      // save the transaction to the database
-      await saveTransactionToAirtable();
     } catch (error) {
       console.error("Error in handleBuyAssets:", error);
       alert("An error occurred while processing your purchase. Please try again.");
@@ -236,8 +234,8 @@ export default function CreatePage() {
         alert(AIWalletAddressFromAPI.error || "Failed to create AI wallet. Please try again.");
         return null;
       }
-      console.log("AI wallet created successfully", AIWalletAddressFromAPI);
-      return AIWalletAddressFromAPI; // Return the wallet address directly
+      console.log("AI wallet created successfully", AIWalletAddressFromAPI.agentWalletAddress);
+      return AIWalletAddressFromAPI.agentWalletAddress; // Return the wallet address directly
       
     } catch (error) {
       console.error("Error creating AI wallet:", error);
@@ -584,13 +582,14 @@ export default function CreatePage() {
               value={investmentPerMonth}
               onChange={(e) => {
                 const value = e.target.value;
-                if (parseInt(value) >= 0) {
-                  setInvestmentPerMonth(parseInt(value));
+                if (parseFloat(value) >= 0) {
+                  setInvestmentPerMonth(parseFloat(value));
                 }
               }}
               placeholder="Enter amount"
               className="w-full p-3 pl-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               min="0"
+              step="0.01"
               required
             />
           </div>
@@ -653,8 +652,6 @@ export default function CreatePage() {
           <div className="flex justify-center gap-4 mb-8">
             <CancelOrderButton />
             <ConfirmRiskAssessmentButton />
-            {isConfirming && <div>Waiting for confirmation...</div>}
-            {isConfirmed && <div>Transaction confirmed.</div>}
           </div>
 
           <div className="flex gap-8 items-start">
