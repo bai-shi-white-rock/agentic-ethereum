@@ -4,7 +4,7 @@ import {
   OwnershipTransferred,
   RateSet,
   TokensSwapped
-} from "../generated/MOCK_Exchange/MOCK_Exchange"
+} from "../generated/MockExchange/MockExchange"
 
 export function createOwnershipTransferredEvent(
   previousOwner: Address,

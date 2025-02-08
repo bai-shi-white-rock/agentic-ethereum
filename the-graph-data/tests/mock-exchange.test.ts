@@ -8,7 +8,7 @@ import {
 } from "matchstick-as/assembly/index"
 import { Address, BigInt } from "@graphprotocol/graph-ts"
 import { OwnershipTransferred } from "../generated/schema"
-import { OwnershipTransferred as OwnershipTransferredEvent } from "../generated/MOCK_Exchange/MOCK_Exchange"
+import { OwnershipTransferred as OwnershipTransferredEvent } from "../generated/MockExchange/MockExchange"
 import { handleOwnershipTransferred } from "../src/mock-exchange"
 import { createOwnershipTransferredEvent } from "./mock-exchange-utils"
 

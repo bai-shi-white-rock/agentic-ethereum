@@ -103,6 +103,24 @@
   },
   {
     "inputs": [
+      {
+        "components": [
+          { "internalType": "address", "name": "tokenFrom", "type": "address" },
+          { "internalType": "address", "name": "tokenTo", "type": "address" },
+          { "internalType": "uint256", "name": "amountFrom", "type": "uint256" }
+        ],
+        "internalType": "struct MockExchange.SwapOrder[]",
+        "name": "orders",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "batchSwap",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
       { "internalType": "address", "name": "", "type": "address" },
       { "internalType": "address", "name": "", "type": "address" }
     ],
@@ -148,17 +166,6 @@
       { "internalType": "uint256", "name": "amountB", "type": "uint256" }
     ],
     "name": "setExchangeRate",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "tokenFrom", "type": "address" },
-      { "internalType": "address", "name": "tokenTo", "type": "address" },
-      { "internalType": "uint256", "name": "amountFrom", "type": "uint256" }
-    ],
-    "name": "swap",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
