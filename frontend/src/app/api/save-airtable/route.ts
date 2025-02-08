@@ -13,14 +13,7 @@ interface AirtableError {
 
 export async function POST(request: Request) {
   try {
-    const { address, investmentPerMonth, summaryRiskPreference, assetAllocationData } = await request.json()
-    
-    if (!address || !investmentPerMonth || !summaryRiskPreference || !assetAllocationData) {
-      return NextResponse.json(
-        { success: false, message: 'Missing required fields' },
-        { status: 400 }
-      )
-    }
+    const { address, investmentPerMonth, summaryRiskPreference, assetAllocation } = await request.json()
 
     // First, find the user record ID by wallet address
     const userRecords = await base(USERS_TABLE)
@@ -44,9 +37,9 @@ export async function POST(request: Request) {
       {
         fields: {
           users: [userRecordId],
-          investmentPerMonth: parseInt(investmentPerMonth),
+          investmentPerMonth: parseFloat(investmentPerMonth),
           riskPreference: JSON.stringify(summaryRiskPreference),
-          assetAllocation: JSON.stringify(assetAllocationData),
+          assetAllocation: JSON.stringify(assetAllocation),
         }
       }
     ]);

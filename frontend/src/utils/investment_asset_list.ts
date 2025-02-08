@@ -5,7 +5,7 @@ export const investment_assets = [
     category: "Cash Savings",
     description:
       "FDIC-insured savings account offering higher interest rates than traditional accounts",
-    smart_contract_address: "0x55dbA6e86D5a96cDFAeD3d1a43D9435998006721",
+    smart_contract_address: "0x8398450d4081E968C406124B72d33a499c260a7c",
     imageURL: "/assetLogo/savings.png",
     marketCap: "500000",
     "12monthsChange": "+4.5",
@@ -18,7 +18,7 @@ export const investment_assets = [
     category: "Bonds",
     description:
       "Government-backed fixed-income securities with various maturity periods",
-    smart_contract_address: "0x0525159449e2e90500670d135b56dDB48d241763",
+    smart_contract_address: "0x20785941F3eA20436d3D7538C23761A124C5840F",
     imageURL: "/assetLogo/treasury.png",
     marketCap: "25000000",
     "12monthsChange": "-2.1",
@@ -31,7 +31,7 @@ export const investment_assets = [
     category: "Bonds",
     description:
       "High-grade corporate bonds from established companies with excellent credit ratings",
-    smart_contract_address: "",
+    smart_contract_address: "0x288C19d808A863900645C69Cd67D1A13a53Cf0b9",
     imageURL: "/assetLogo/corporate-bonds.png",
     marketCap: "10000000",
     "12monthsChange": "-1.8",
@@ -44,7 +44,7 @@ export const investment_assets = [
     category: "Stocks",
     description:
       "Common stock shares of Apple Inc., a leading technology company",
-    smart_contract_address: "",
+    smart_contract_address: "0x65401a95f07d64297276f75947e765956f6b40b9",
     imageURL: "/assetLogo/apple.png",
     marketCap: "2700000",
     "12monthsChange": "+21.5",
@@ -57,7 +57,7 @@ export const investment_assets = [
     category: "Stocks",
     description:
       "Common stock shares of Microsoft Corporation, a major software and cloud computing company",
-    smart_contract_address: "",
+    smart_contract_address: "0xfE502AB6F4049E624689fcf9086F512EF0A0E6EA",
     imageURL: "/assetLogo/msft.png",
     marketCap: "3000000",
     "12monthsChange": "+25.3",

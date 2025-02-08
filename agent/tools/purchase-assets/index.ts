@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { customActionProvider, EvmWalletProvider } from "@coinbase/agentkit";
-import { investment_assets } from "./investment_asset_list";
+import { investment_asset_list } from "../../constant/investment_asset_list";
 import { mnemonicToAccount } from "viem/accounts";
 import { createWalletClient, createPublicClient } from "viem";
 import { baseSepolia } from "viem/chains";
@@ -8,15 +8,15 @@ import { http } from "viem";
 import { erc20abi } from "./erc20abi";
 import { abi as exchangeAbi } from "./abi";
 
-const EXCHANGE_CONTRACT_ADDRESS = "0x1936e0493A8EBE16dAbb27C2612581B832Cf94EE";
+const EXCHANGE_CONTRACT_ADDRESS = "0xbc4AA9cE14769bA3e52fe38a4E369DF483169e99";
 const USDC_CONTRACT_ADDRESS = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
 
 const purchaseAssets = customActionProvider<EvmWalletProvider>({
-  // wallet types specify which providers can use this action. It can be as generic as WalletProvider or as specific as CdpWalletProvider
+  // wallet types specify which providers can use this action. It can be as generic as WalletProvider or as specipasic as CdpWalletProvider
   name: "purchase_assets",
   description: `Purchase assets using on chain using the Exchange contract;
-  this tool can be use on 'sepolia-base' network
-  You can only purchase assets in this list: HYS, USB;
+  this tool can be use on 'base-sepolia' network
+  You can only purchase assets in this list: ${investment_asset_list.map(asset => asset.ticket).join(', ')}
   if user need to purchase other assets, tell them to purchase from the exchange website.
   `,
   schema: z.object({
@@ -29,7 +29,7 @@ const purchaseAssets = customActionProvider<EvmWalletProvider>({
       const { asset, amount, mnemonicPhrase } = args;
 
       // Get the smart contract address of the asset
-      const ASSET_CONTRACT_ADDRESS = investment_assets.find(
+      const ASSET_CONTRACT_ADDRESS = investment_asset_list.find(
         (_asset) => _asset.ticket === asset
       )?.smart_contract_address;
 
@@ -96,11 +96,15 @@ const purchaseAssets = customActionProvider<EvmWalletProvider>({
         account,
         address: EXCHANGE_CONTRACT_ADDRESS,
         abi: exchangeAbi,
-        functionName: "swap",
+        functionName: "batchSwap",
         args: [
-          USDC_CONTRACT_ADDRESS,
-          ASSET_CONTRACT_ADDRESS as `0x${string}`,
-          usdcToSpendAmount,
+          [
+            {
+              tokenFrom: USDC_CONTRACT_ADDRESS,
+              tokenTo: ASSET_CONTRACT_ADDRESS as `0x${string}`,
+              amountFrom: usdcToSpendAmount,
+            },
+          ],
         ],
       });
       
