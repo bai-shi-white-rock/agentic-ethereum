@@ -16,26 +16,36 @@ const purchaseAssets = customActionProvider<EvmWalletProvider>({
   name: "purchase_assets",
   description: `Purchase assets using on chain using the Exchange contract;
   this tool can be use on 'base-sepolia' network
-  You can only purchase assets in this list: ${investment_asset_list.map(asset => asset.ticket).join(', ')}
+  You can only purchase assets in this list: ${investment_asset_list
+    .map((asset) => asset.ticket)
+    .join(", ")}
   if user need to purchase other assets, tell them to purchase from the exchange website.
   `,
   schema: z.object({
-    asset: z.string().describe("The asset to purchase"),
-    amount: z.string().describe("The amount to spend (wei)"),
+    assets: z
+      .array(
+        z.object({
+          asset_name: z.string().describe("The asset to purchase"),
+          smartContractAddress: z
+            .string()
+            .describe("The smart contract address of the asset"),
+          amount: z
+            .string()
+            .describe(
+              "The amount to spend (in USDC / please give me the exact amount of what user inputed do not round it or calculate it)"
+            ),
+        })
+      )
+      .describe(
+        "Assets to purchase, can be multiple assets at once (and we will purchase them all at once, no need to call this tool multiple times)"
+      ),
     mnemonicPhrase: z.string().describe("The mnemonic phrase of the wallet"),
   }),
   invoke: async (_, args: any) => {
     try {
-      const { asset, amount, mnemonicPhrase } = args;
+      const { assets, mnemonicPhrase } = args;
 
-      // Get the smart contract address of the asset
-      const ASSET_CONTRACT_ADDRESS = investment_asset_list.find(
-        (_asset) => _asset.ticket === asset
-      )?.smart_contract_address;
-
-      if (!ASSET_CONTRACT_ADDRESS) {
-        return `Asset not found or not supported: ${asset}`;
-      }
+      console.log("assets", assets);
 
       // somehow CdpWalletProvider is not working, so we need to use viem to do this ;-;
       const account = mnemonicToAccount(mnemonicPhrase);
@@ -49,31 +59,29 @@ const purchaseAssets = customActionProvider<EvmWalletProvider>({
         transport: http(),
       });
 
-      // Get exchange rate
-      let exchangeRate = await publicClient.readContract({
-        address: EXCHANGE_CONTRACT_ADDRESS,
-        abi: exchangeAbi,
-        functionName: "getExchangeAmount",
-        args: [
-          USDC_CONTRACT_ADDRESS,
-          ASSET_CONTRACT_ADDRESS as `0x${string}`,
-          BigInt(1),
-        ],
-      });
+      const usdcToSpendAmount = assets.reduce((acc, asset) => {
+        return acc + BigInt(Number(asset.amount) * 10 ** 6);
+      }, BigInt(0));
 
-      // calculate the amount of USDC to spend
-      const usdcToSpendAmount = (BigInt(amount) * exchangeRate);
+      const convertToWei = (amount: string) => {
+        return BigInt(Number(amount) * 10 ** 6);
+      };
 
-      // Get the balance of the user
-      const balance = await publicClient.readContract({
+      const usdcBalance = await publicClient.readContract({
         address: USDC_CONTRACT_ADDRESS,
         abi: erc20abi,
         functionName: "balanceOf",
         args: [account.address],
       });
 
-      if (balance < usdcToSpendAmount) {
-        return `Insufficient balance of USDC: ${balance}; You need to spend ${usdcToSpendAmount} USDC to purchase ${amount} ${asset} tokens. Stop at once!`;
+      console.log(
+        "usdcToSpendAmount, usdcBalance",
+        usdcToSpendAmount,
+        usdcBalance
+      );
+
+      if (usdcBalance < usdcToSpendAmount) {
+        return `Insufficient balance of USDC: ${usdcBalance}; You need to spend ${usdcToSpendAmount} USDC. Stop at once, no need to call this tool again ask user to send more USDC!`;
       }
 
       // Set allowance for the asset contract
@@ -82,11 +90,10 @@ const purchaseAssets = customActionProvider<EvmWalletProvider>({
         address: USDC_CONTRACT_ADDRESS,
         abi: erc20abi,
         functionName: "approve",
-        args: [
-          EXCHANGE_CONTRACT_ADDRESS,
-          BigInt("1000000000000000000"),
-        ],
+        args: [EXCHANGE_CONTRACT_ADDRESS, BigInt(usdcToSpendAmount)],
       });
+
+      console.log("setting allowance for the asset contract...");
 
       await publicClient.waitForTransactionReceipt({
         hash: allowanceHash,
@@ -98,22 +105,24 @@ const purchaseAssets = customActionProvider<EvmWalletProvider>({
         abi: exchangeAbi,
         functionName: "batchSwap",
         args: [
-          [
-            {
+          assets.map((asset) => {
+            console.log("asset", asset.smartContractAddress);
+            return {
               tokenFrom: USDC_CONTRACT_ADDRESS,
-              tokenTo: ASSET_CONTRACT_ADDRESS as `0x${string}`,
-              amountFrom: usdcToSpendAmount,
-            },
-          ],
+              tokenTo: asset.smartContractAddress,
+              amountFrom: convertToWei(asset.amount),
+            };
+          }),
         ],
       });
-      
+
+      console.log("swapping assets...");
 
       await publicClient.waitForTransactionReceipt({
         hash: swapHash,
       });
 
-      return `Successfully purchased asset: ${asset}, Amount: ${amount};`; // Transaction hash: ${swapHash}`;
+      return `Successfully purchased assets, Say congratulations to the user! also here is the transaction hash: ${swapHash}`;
     } catch (error) {
       console.error(error);
       return `Error: ${error}`;

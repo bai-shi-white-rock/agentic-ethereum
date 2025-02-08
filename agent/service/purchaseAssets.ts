@@ -11,7 +11,7 @@ export async function handlePurchaseAssetsRequest(req: Request, res: Response) {
   const USERS_TABLE = "users";
 
   try {
-    const { walletAddress, purchaseOrder } = req.body;
+    const { walletAddress, purchaseOrder, totalAmount } = req.body;
 
     if (!walletAddress || !purchaseOrder) {
       return res.status(400).json({
@@ -49,11 +49,28 @@ export async function handlePurchaseAssetsRequest(req: Request, res: Response) {
     const walletProvider = await CdpWalletProvider.configureWithWallet(config);
     const { agent, agentConfig } = await initializeAgent(walletProvider);
 
+    console.log("purchaseOrder", purchaseOrder);
+
+    // Convert purchase order object to text format
+    let purchaseOrderText = '';
+    for (const [asset, details] of Object.entries(purchaseOrder)) {
+      const allocation = (details as any).allocation;
+      const smartContractAddress = (details as any).smart_contract_address;
+      const symbol = asset.match(/\((.*?)\)/)?.[1] || asset;
+      purchaseOrderText += `${(allocation * totalAmount).toFixed(2)} ${symbol} with address ${smartContractAddress}\n`;
+    }
+
+    console.log("Purchase order in text format: \n", purchaseOrderText);
+    
     const result = await agent.invoke(
       {
         messages: [
           new HumanMessage(
-            `You'll use purchase_assets tool to purchase assets. Here is the list of purchase orders: ${purchaseOrder}
+            `You'll use purchase_assets tool to purchase assets. Here is the list of purchase orders:
+            '''
+            ${purchaseOrderText}
+            '''
+            please pack all the assets into one call of purchase_assets tool, and only once, no need to call it multiple times, and no need to call it again if it fails, just stop the tool and say that you failed to purchase the assets, and ask user to send more USDC.
             and this is the mnemonic phrase of the wallet: ${cdpMnemonicPhrase}`
           ),
         ],

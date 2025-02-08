@@ -64,7 +64,7 @@ export default function CreatePage() {
     "Vanguard S&P 500 ETF": 10,
     "Fidelity Total Market Index Fund": 30,
   });
-  const { payWithUSDC, isConfirming, isConfirmed } = usePayWithUSDC();
+  const { payWithUSDC /*, isConfirming, isConfirmed */ } = usePayWithUSDC();
 
   // helper functions
   const getRandomNumber = () => {
@@ -290,6 +290,7 @@ export default function CreatePage() {
         body: JSON.stringify({
           walletAddress: address,
           purchaseOrder: assetAllocationWithSmartContractAddress,
+          totalAmount: investmentPerMonth,
         }),
       });
 
