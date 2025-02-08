@@ -66,7 +66,6 @@ export default function CreatePage() {
   });
   const { payWithUSDC, isConfirming, isConfirmed } = usePayWithUSDC();
 
-
   // helper functions
   const getRandomNumber = () => {
     return Math.floor(Math.random() * 20);
@@ -80,8 +79,6 @@ export default function CreatePage() {
     } while (second === first);
     return [first, second];
   };
-
-
 
   useEffect(() => {
     const [firstIndex, secondIndex] = getTwoUniqueRandomNumbers();
@@ -113,6 +110,10 @@ export default function CreatePage() {
 
   const prevPage = () => {
     setPage(page - 1);
+  };
+
+  const routeToDashboard = () => {
+    router.push("/dashboard");
   };
 
   const PreviousButton = () => (
@@ -158,7 +159,7 @@ export default function CreatePage() {
         }),
       });
       const assetAllocationData = await assetAllocationResponse.json();
-      
+
       if (!assetAllocationResponse.ok) {
         console.error(
           "Failed to submit asset allocation:",
@@ -192,32 +193,33 @@ export default function CreatePage() {
       // transfer USDC to the AI wallet
       await payWithUSDC(AIWalletAddress, investmentPerMonth);
 
-      if (isConfirmed) {
-        // Call API to buy assets
-        await buyAssetAPI();
+      // Call API to buy assets
+      await buyAssetAPI();
 
-        // save the transaction to the database
-        await saveTransactionToAirtable();
-      }
+      // save the transaction to the database
+      await saveTransactionToAirtable();
+
+      // send user to dashboard page
+      await routeToDashboard();
     } catch (error) {
       console.error("Error in handleBuyAssets:", error);
-      alert("An error occurred while processing your purchase. Please try again.");
+      alert(
+        "An error occurred while processing your purchase. Please try again."
+      );
     }
   };
 
   const getAIWalletAddress = async () => {
-    if (isLoading) return null;
-    
     // create a wallet
     try {
       setIsLoading(true);
-      
+
       if (!address) {
         alert("Please connect your wallet first");
         return null;
       }
 
-      const createWalletResponse = await fetch('/api/create-ai-wallet', {
+      const createWalletResponse = await fetch("/api/create-ai-wallet", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -228,28 +230,58 @@ export default function CreatePage() {
       });
 
       const AIWalletAddressFromAPI = await createWalletResponse.json();
-      
+
       if (!createWalletResponse.ok) {
-        console.error("Failed to create AI wallet:", AIWalletAddressFromAPI.error);
-        alert(AIWalletAddressFromAPI.error || "Failed to create AI wallet. Please try again.");
+        console.error(
+          "Failed to create AI wallet:",
+          AIWalletAddressFromAPI.error
+        );
+        alert(
+          AIWalletAddressFromAPI.error ||
+            "Failed to create AI wallet. Please try again."
+        );
         return null;
       }
-      console.log("AI wallet created successfully", AIWalletAddressFromAPI.agentWalletAddress);
+      console.log(
+        "AI wallet created successfully",
+        AIWalletAddressFromAPI.agentWalletAddress
+      );
       return AIWalletAddressFromAPI.agentWalletAddress; // Return the wallet address directly
-      
     } catch (error) {
       console.error("Error creating AI wallet:", error);
-      alert("An error occurred while creating your AI wallet. Please try again.");
+      alert(
+        "An error occurred while creating your AI wallet. Please try again."
+      );
       return null;
     } finally {
       setIsLoading(false);
     }
   };
-  
 
   const buyAssetAPI = async () => {
     // Call API to buy assets
+    console.log("start buying assets now...");
+    setIsLoading(true);
+
+    const assetAllocationWithSmartContractAddress = Object.entries(assetAllocation).reduce((acc, [name, allocation]) => {
+      const asset = investment_assets.find((_asset) => _asset.name === name);
+      const allocationAmount = Number(allocation) * investmentPerMonth / 100;
+      return {
+        ...acc,
+        [name]: {
+          allocation: allocationAmount,
+          smart_contract_address: asset?.smart_contract_address || ""
+        }
+      };
+    }, {} as Record<string, { allocation: number; smart_contract_address: string }>);
+
     try {
+      console.log(
+        "Buying assets for wallet: ",
+        address,
+        "with purchase order: ",
+        assetAllocationWithSmartContractAddress
+      );
       const buyAssetResponse = await fetch("/api/buy-asset", {
         method: "POST",
         headers: {
@@ -257,7 +289,7 @@ export default function CreatePage() {
         },
         body: JSON.stringify({
           walletAddress: address,
-          purchaseOrder: assetAllocation,
+          purchaseOrder: assetAllocationWithSmartContractAddress,
         }),
       });
 
@@ -270,17 +302,37 @@ export default function CreatePage() {
 
       const buyAssetData = await buyAssetResponse.json();
       console.log("Assets purchased successfully", buyAssetData);
-      alert("Assets purchased successfully!");
-      
     } catch (error) {
       console.error("Error buying assets:", error);
       alert("An error occurred while buying assets. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const saveTransactionToAirtable = async () => {
     // save the transaction to the database
+    console.log("start saving transaction to airtable now...");
+    const summaryRiskPreference = {
+      age,
+      investmentPerMonth,
+      investmentGoal,
+      riskTolerance,
+      pairWiseResponse,
+    };
+    console.log(
+      "Here is the body to save airtable; address: ",
+      address,
+      "investmentPerMonth: ",
+      investmentPerMonth,
+      "summaryRiskPreference: ",
+      summaryRiskPreference,
+      "assetAllocation: ",
+      assetAllocation
+    );
+
     try {
+      setIsLoading(true);
       const airtableResponse = await fetch("/api/save-airtable", {
         method: "POST",
         headers: {
@@ -289,13 +341,7 @@ export default function CreatePage() {
         body: JSON.stringify({
           address,
           investmentPerMonth,
-          summaryRiskPreference: {
-            age,
-            investmentPerMonth,
-            investmentGoal,
-            riskTolerance,
-            pairWiseResponse,
-          },
+          summaryRiskPreference,
           assetAllocation,
         }),
       });
@@ -303,15 +349,21 @@ export default function CreatePage() {
       const airtableData = await airtableResponse.json();
       if (!airtableData.success) {
         console.error("Failed to save transaction:", airtableData.message);
-        alert(airtableData.message || "Failed to save transaction. Please try again.");
+        alert(
+          airtableData.message ||
+            "Failed to save transaction. Please try again."
+        );
         return;
       }
 
       console.log("Transaction saved successfully");
-      router.push('/dashboard');
     } catch (error) {
       console.error("Error saving transaction:", error);
-      alert("An error occurred while saving the transaction. Please try again.");
+      alert(
+        "An error occurred while saving the transaction. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -326,7 +378,6 @@ export default function CreatePage() {
       {isLoading ? "Submitting..." : "Confirm"}
     </button>
   );
-
 
   const BuyAssetButton = () => (
     <button
@@ -364,7 +415,17 @@ export default function CreatePage() {
           />
           <div className="flex justify-between mt-6">
             <PreviousButton />
-            <NextButton />
+            <button
+              onClick={nextPage}
+              disabled={!age}
+              className={`px-6 py-3 rounded-lg font-medium ${
+                age
+                  ? "bg-primary text-white hover:bg-secondary"
+                  : "bg-primary/20 text-white cursor-not-allowed"
+              } transition-colors duration-200`}
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>
@@ -595,7 +656,17 @@ export default function CreatePage() {
           </div>
           <div className="flex justify-between mt-6">
             <PreviousButton />
-            <NextButton />
+            <button
+              onClick={nextPage}
+              disabled={!investmentPerMonth}
+              className={`px-6 py-3 rounded-lg font-medium ${
+                investmentPerMonth
+                  ? "bg-primary text-white hover:bg-secondary"
+                  : "bg-primary/20 text-white cursor-not-allowed"
+              } transition-colors duration-200`}
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>
@@ -634,7 +705,17 @@ export default function CreatePage() {
           </div>
           <div className="flex justify-between mt-6">
             <PreviousButton />
-            <NextButton />
+            <button
+              onClick={nextPage}
+              disabled={!riskTolerance}
+              className={`px-6 py-3 rounded-lg font-medium ${
+                riskTolerance
+                  ? "bg-primary text-white hover:bg-secondary"
+                  : "bg-primary/20 text-white cursor-not-allowed"
+              } transition-colors duration-200`}
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>
@@ -739,6 +820,9 @@ export default function CreatePage() {
         <div className="flex justify-center">
           <AssetAllocationChart allocation={assetAllocation} />
         </div>
+        <div className="text-center text-gray-600">
+          REMINDER: You need {investmentPerMonth} USDC to buy the assets
+        </div>
         <div className="flex justify-center gap-4">
           <CancelOrderButton />
           <BuyAssetButton />
@@ -805,7 +889,10 @@ export default function CreatePage() {
 
   const CancelOrderButton = () => {
     return (
-      <button onClick={() => router.push("/dashboard")} className="bg-red-500 text-white px-4 py-2 rounded-md">
+      <button
+        onClick={() => router.push("/dashboard")}
+        className="bg-red-500 text-white px-4 py-2 rounded-md"
+      >
         Cancel Order
       </button>
     );

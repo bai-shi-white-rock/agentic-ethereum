@@ -53,7 +53,7 @@ export async function handlePurchaseAssetsRequest(req: Request, res: Response) {
       {
         messages: [
           new HumanMessage(
-            `You'll use purchase_assets tool to purchase assets. Here is the purchase order: ${purchaseOrder}
+            `You'll use purchase_assets tool to purchase assets. Here is the list of purchase orders: ${purchaseOrder}
             and this is the mnemonic phrase of the wallet: ${cdpMnemonicPhrase}`
           ),
         ],

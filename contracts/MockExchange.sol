@@ -8,16 +8,27 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 contract MockExchange is Ownable, ReentrancyGuard {
     // Struct to store exchange rate information
     struct ExchangeRate {
-        uint256 amountA;  // Amount of token A
-        uint256 amountB;  // Amount of token B
+        uint256 amountA; // Amount of token A
+        uint256 amountB; // Amount of token B
         bool exists;
+    }
+
+    struct SwapOrder {
+        address tokenFrom;
+        address tokenTo;
+        uint256 amountFrom;
     }
 
     // Mapping to store exchange rates between token pairs
     mapping(address => mapping(address => ExchangeRate)) public exchangeRates;
 
     // Events
-    event RateSet(address tokenA, address tokenB, uint256 amountA, uint256 amountB);
+    event RateSet(
+        address tokenA,
+        address tokenB,
+        uint256 amountA,
+        uint256 amountB
+    );
     event TokensSwapped(
         address indexed user,
         address tokenFrom,
@@ -35,7 +46,10 @@ contract MockExchange is Ownable, ReentrancyGuard {
         uint256 amountA,
         uint256 amountB
     ) external onlyOwner {
-        require(tokenA != address(0) && tokenB != address(0), "Invalid token address");
+        require(
+            tokenA != address(0) && tokenB != address(0),
+            "Invalid token address"
+        );
         require(amountA > 0 && amountB > 0, "Amounts must be greater than 0");
 
         exchangeRates[tokenA][tokenB] = ExchangeRate(amountA, amountB, true);
@@ -59,24 +73,43 @@ contract MockExchange is Ownable, ReentrancyGuard {
         return (amountFrom * rate.amountB) / rate.amountA;
     }
 
-    // Swap tokens
-    function swap(
-        address tokenFrom,
-        address tokenTo,
-        uint256 amountFrom
-    ) external nonReentrant {
-        require(amountFrom > 0, "Amount must be greater than 0");
-        
-        uint256 amountTo = getExchangeAmount(tokenFrom, tokenTo, amountFrom);
-        require(amountTo > 0, "Invalid exchange amount");
+    // Batch swap tokens
+    function batchSwap(SwapOrder[] calldata orders) external nonReentrant {
+        uint256 orderCount = orders.length;
+        require(orderCount > 0, "No swap orders provided");
 
-        // Transfer tokens from user to contract
-        IERC20(tokenFrom).transferFrom(msg.sender, address(this), amountFrom);
-        
-        // Transfer tokens from contract to user
-        IERC20(tokenTo).transfer(msg.sender, amountTo);
+        // for loop each order
+        for (uint256 i = 0; i < orderCount; i++) {
+            SwapOrder calldata order = orders[i];
+            require(
+                order.amountFrom > 0,
+                "Order: amount must be greater than 0"
+            );
 
-        emit TokensSwapped(msg.sender, tokenFrom, tokenTo, amountFrom, amountTo);
+            uint256 amountTo = getExchangeAmount(
+                order.tokenFrom,
+                order.tokenTo,
+                order.amountFrom
+            );
+            require(amountTo > 0, "Order: invalid exchange amount");
+
+            // Transfer tokens from user to contract 
+            IERC20(order.tokenFrom).transferFrom(
+                msg.sender,
+                address(this),
+                order.amountFrom
+            );
+            // Transfer swapped tokens from contract to user
+            IERC20(order.tokenTo).transfer(msg.sender, amountTo);
+
+            emit TokensSwapped(
+                msg.sender,
+                order.tokenFrom,
+                order.tokenTo,
+                order.amountFrom,
+                amountTo
+            );
+        }
     }
 
     // Allow owner to withdraw tokens (in case of emergency or rebalancing)
@@ -88,4 +121,3 @@ contract MockExchange is Ownable, ReentrancyGuard {
         IERC20(token).transfer(to, amount);
     }
 }
-
