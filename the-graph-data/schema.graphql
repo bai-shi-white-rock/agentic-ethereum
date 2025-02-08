@@ -1,21 +1,9 @@
-type OwnershipTransferred @entity(immutable: true) {
-  id: Bytes!
-  previousOwner: Bytes! # address
-  newOwner: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
 type RateSet @entity(immutable: true) {
   id: Bytes!
   tokenA: Bytes! # address
   tokenB: Bytes! # address
   amountA: BigInt! # uint256
   amountB: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
 }
 
 type TokensSwapped @entity(immutable: true) {
@@ -25,7 +13,5 @@ type TokensSwapped @entity(immutable: true) {
   tokenTo: Bytes! # address
   amountFrom: BigInt! # uint256
   amountTo: BigInt! # uint256
-  blockNumber: BigInt!
   blockTimestamp: BigInt!
-  transactionHash: Bytes!
 }
