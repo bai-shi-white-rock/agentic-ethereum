@@ -70,7 +70,7 @@ export const investment_asset_list = [
     category: "Funds",
     description:
       "Exchange-traded fund tracking the S&P 500 index of large-cap US stocks",
-    smart_contract_address: "",
+    smart_contract_address: "0x48096f208eD6ee803D769fcdeC4ecEec7bB5FD28",
     imageURL: "/assetLogo/voo.png",
     marketCap: "1000000",
     "12monthsChange": "+18.2",
@@ -83,7 +83,7 @@ export const investment_asset_list = [
     category: "Cryptocurrencies",
     description:
       "The first and largest cryptocurrency by market capitalization",
-    smart_contract_address: "",
+    smart_contract_address: "0xA4617C40113b1a5Ad90A8283699F2Da68eeeC001",
     imageURL: "/assetLogo/btc.png",
     marketCap: "1300000",
     "12monthsChange": "+62.4",
@@ -96,7 +96,7 @@ export const investment_asset_list = [
     category: "Cryptocurrencies",
     description:
       "Leading smart contract platform and second-largest cryptocurrency",
-    smart_contract_address: "",
+    smart_contract_address: "0x105388CFB20400c67614E09467efff1F447dAd33",
     imageURL: "/assetLogo/eth.png",
     marketCap: "400000",
     "12monthsChange": "+48.7",
@@ -108,7 +108,7 @@ export const investment_asset_list = [
     name: "Residential Real Estate Trust",
     category: "Real Estate",
     description: "Investment trust focused on residential property portfolios",
-    smart_contract_address: "",
+    smart_contract_address: "0x4E660De6113794B031b3058f9Cd1A6e7a6E24043",
     imageURL: "/assetLogo/residential-reit.png",
     marketCap: "50000",
     "12monthsChange": "+8.3",
@@ -121,7 +121,7 @@ export const investment_asset_list = [
     category: "Real Estate",
     description:
       "Real Estate Investment Trust specializing in commercial properties",
-    smart_contract_address: "",
+    smart_contract_address: "0xD4331df50CF356Ce0e5baCF1b824f53366239118",
     imageURL: "/assetLogo/commercial-reit.png",
     marketCap: "40000",
     "12monthsChange": "+5.2",
@@ -134,7 +134,7 @@ export const investment_asset_list = [
     category: "Cash Savings",
     description:
       "Low-risk investment vehicle investing in short-term debt securities",
-    smart_contract_address: "",
+    smart_contract_address: "0x0f7e538A11F23e47a5Dc2c7Ce2e469C980006717",
     imageURL: "/assetLogo/money-market.png",
     marketCap: "6000000",
     "12monthsChange": "+4.1",
@@ -146,7 +146,7 @@ export const investment_asset_list = [
     name: "Municipal Bonds",
     category: "Bonds",
     description: "Tax-exempt bonds issued by state and local governments",
-    smart_contract_address: "",
+    smart_contract_address: "0x2b228F1a7d7631d3C08235331ffC89ddc2195565",
     imageURL: "/assetLogo/muni-bonds.png",
     marketCap: "4000000",
     "12monthsChange": "-0.8",
@@ -159,7 +159,7 @@ export const investment_asset_list = [
     category: "Stocks",
     description:
       "Common stock shares of Amazon.com, leading e-commerce and cloud services provider",
-    smart_contract_address: "",
+    smart_contract_address: "0x49AaB72859706913ce47C0F38fA11b481D1ae379",
     imageURL: "/assetLogo/amzn.png",
     marketCap: "1800000",
     "12monthsChange": "+32.1",
@@ -172,7 +172,7 @@ export const investment_asset_list = [
     category: "Cryptocurrencies",
     description:
       "High-performance blockchain platform for decentralized applications",
-    smart_contract_address: "",
+    smart_contract_address: "0xcaA4F1dcC16fb15307C8d3A30DdBf9d5E1123C0d",
     imageURL: "/assetLogo/sol.png",
     marketCap: "80000",
     "12monthsChange": "+280.5",
@@ -185,7 +185,7 @@ export const investment_asset_list = [
     category: "Funds",
     description:
       "Mutual fund providing broad exposure to the entire US stock market",
-    smart_contract_address: "",
+    smart_contract_address: "0x3b35cb33Fa1F3848e2b24367F583cBAa2577DB91",
     imageURL: "/assetLogo/fidelity.png",
     marketCap: "500000",
     "12monthsChange": "+16.8",
@@ -198,7 +198,7 @@ export const investment_asset_list = [
     category: "Real Estate",
     description:
       "Real Estate Investment Trust focusing on industrial and logistics properties",
-    smart_contract_address: "",
+    smart_contract_address: "0x250f36675270D24E00d090712Cd8825A447bBD8C",
     imageURL: "/assetLogo/industrial-reit.png",
     marketCap: "30000",
     "12monthsChange": "+12.4",
@@ -211,7 +211,7 @@ export const investment_asset_list = [
     category: "Cash Savings",
     description:
       "Time-deposit account with fixed interest rate and maturity date",
-    smart_contract_address: "",
+    smart_contract_address: "0x89A4E10Bd7aA51E6d419e308c07F05d349E2fcb2",
     imageURL: "/assetLogo/cd.png",
     marketCap: "200000",
     "12monthsChange": "+4.8",
@@ -224,7 +224,7 @@ export const investment_asset_list = [
     category: "Stocks",
     description:
       "Common stock shares of Alphabet Inc., parent company of Google",
-    smart_contract_address: "",
+    smart_contract_address: "0xC8590ecc75aFFF7fa54bD259004bab494BDF6a7e",
     imageURL: "/assetLogo/googl.png",
     marketCap: "2200000",
     "12monthsChange": "+28.7",
@@ -237,7 +237,7 @@ export const investment_asset_list = [
     category: "Cryptocurrencies",
     description:
       "Proof-of-stake blockchain platform with focus on sustainability",
-    smart_contract_address: "",
+    smart_contract_address: "0xF103b3f6E2056Af256aB037D796f47F8d88778C5",
     imageURL: "/assetLogo/ada.png",
     marketCap: "20000",
     "12monthsChange": "+32.4",
@@ -250,7 +250,7 @@ export const investment_asset_list = [
     category: "Real Estate",
     description:
       "Exchange-traded fund investing in real estate companies worldwide",
-    smart_contract_address: "",
+    smart_contract_address: "0x85fA7823cbcDD5793db20f0b48c190A6206fD946",
     imageURL: "/assetLogo/global-reit.png",
     marketCap: "5000",
     "12monthsChange": "+7.2",
