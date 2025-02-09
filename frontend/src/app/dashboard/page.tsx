@@ -8,14 +8,6 @@ import { Button } from "@/components/ui/button";
 import PortfolioChart from "@/components/portfolioChart";
 import { AssetAllocationChart } from "@/components/AssetAllocationChart";
 
-interface RateSet {
-  id: string;
-  tokenA: string;
-  tokenB: string;
-  amountA: string;
-  amountB: string;
-}
-
 interface TokenSwapped {
   id: string;
   user: string;
@@ -35,10 +27,7 @@ interface InvestmentPlan {
 
 interface PortfolioData {
   investmentPlans: InvestmentPlan[];
-  graphData: {
-    rateSets: RateSet[];
-    swapHistory: TokenSwapped[];
-  };
+  graphData: TokenSwapped[];
 }
 
 export default function DashboardPage() {
@@ -56,7 +45,7 @@ export default function DashboardPage() {
         const response = await fetch(`/api/portfolio?address=${address}`);
         const result = await response.json();
         const data = result.data as PortfolioData;
-        const totalPortfolioValue = data.graphData.swapHistory.reduce(
+        const totalPortfolioValue = data.graphData.reduce(
           (sum: number, swap: TokenSwapped) =>
             sum + parseFloat(swap.amountFrom) / 1000000, // 6 decimals in USDC 
           0
@@ -131,7 +120,7 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-3xl font-bold">
-                    ${portfolioValue.toLocaleString()}
+                    ${portfolioValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                   </p>
                   <p className="text-sm text-neutral-500 mt-1">
                     Click to view details

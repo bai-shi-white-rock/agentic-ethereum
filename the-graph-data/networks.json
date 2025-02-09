@@ -2,7 +2,7 @@
   "base-sepolia": {
     "MockExchange": {
       "address": "0xbc4AA9cE14769bA3e52fe38a4E369DF483169e99",
-      "startBlock": 21616585
+      "startBlock": 21631840
     }
   }
 }

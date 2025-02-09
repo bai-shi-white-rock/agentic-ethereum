@@ -5,23 +5,26 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
-    name: MOCK_Exchange
+    name: MockExchange
     network: base-sepolia
     source:
-      address: "0x1936e0493A8EBE16dAbb27C2612581B832Cf94EE"
-      abi: MOCK_Exchange
-      startBlock: 21481527
+      address: "0xbc4AA9cE14769bA3e52fe38a4E369DF483169e99"
+      abi: MockExchange
+      startBlock: 21631840
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
+        - OwnershipTransferred
         - RateSet
         - TokensSwapped
       abis:
-        - name: MOCK_Exchange
-          file: ./abis/MOCK_Exchange.json
+        - name: MockExchange
+          file: ./abis/MockExchange.json
       eventHandlers:
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
         - event: RateSet(address,address,uint256,uint256)
           handler: handleRateSet
         - event: TokensSwapped(indexed address,address,address,uint256,uint256)
