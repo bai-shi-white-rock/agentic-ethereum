@@ -23,7 +23,7 @@ const purchaseAssets = customActionProvider<EvmWalletProvider>({
   name: "purchase_assets",
   description: `Purchase assets using on chain using the Exchange contract;
   this tool can be use on 'base-sepolia' network
-  You can only purchase assets in this list: ${investment_asset_list
+  You can only purchase assets in this smart contract address list: ${investment_asset_list
     .map((asset) => asset.ticket)
     .join(", ")}
   DO NOT change the smart contract address, just use the ones we give you. 
