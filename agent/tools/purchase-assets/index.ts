@@ -11,6 +11,13 @@ import { abi as exchangeAbi } from "./abi";
 const EXCHANGE_CONTRACT_ADDRESS = "0xbc4AA9cE14769bA3e52fe38a4E369DF483169e99";
 const USDC_CONTRACT_ADDRESS = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
 
+console.log(
+  "investment_asset_list before pass to AI: ",
+  investment_asset_list
+    .map((asset) => asset.ticket)
+    .join(", ")
+);
+
 const purchaseAssets = customActionProvider<EvmWalletProvider>({
   // wallet types specify which providers can use this action. It can be as generic as WalletProvider or as specipasic as CdpWalletProvider
   name: "purchase_assets",
@@ -19,7 +26,9 @@ const purchaseAssets = customActionProvider<EvmWalletProvider>({
   You can only purchase assets in this list: ${investment_asset_list
     .map((asset) => asset.ticket)
     .join(", ")}
-  if user need to purchase other assets, tell them to purchase from the exchange website.
+  DO NOT change the smart contract address, just use the ones we give you. 
+  Because we use the mock contract address, so you must remember that you must use the contract address that we give you, 
+  even the Ethereum contract address, use the one we give you.
   `,
   schema: z.object({
     assets: z
@@ -28,7 +37,7 @@ const purchaseAssets = customActionProvider<EvmWalletProvider>({
           asset_name: z.string().describe("The asset to purchase"),
           smartContractAddress: z
             .string()
-            .describe("The smart contract address of the asset"),
+            .describe("The smart contract address of the asset that we pass to you"),
           amount: z
             .string()
             .describe(

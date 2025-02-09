@@ -54,10 +54,10 @@ export async function handlePurchaseAssetsRequest(req: Request, res: Response) {
     // Convert purchase order object to text format
     let purchaseOrderText = '';
     for (const [asset, details] of Object.entries(purchaseOrder)) {
-      const allocation = (details as any).allocation;
+      const allocationAmount = (details as any).allocation;
       const smartContractAddress = (details as any).smart_contract_address;
       const symbol = asset.match(/\((.*?)\)/)?.[1] || asset;
-      purchaseOrderText += `${(allocation * totalAmount).toFixed(2)} ${symbol} with address ${smartContractAddress}\n`;
+      purchaseOrderText += `${allocationAmount} ${symbol} with address ${smartContractAddress}\n`;
     }
 
     console.log("Purchase order in text format: \n", purchaseOrderText);
