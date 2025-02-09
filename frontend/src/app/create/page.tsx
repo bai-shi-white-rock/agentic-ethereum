@@ -193,6 +193,9 @@ export default function CreatePage() {
       // transfer USDC to the AI wallet
       await payWithUSDC(AIWalletAddress, investmentPerMonth);
 
+      // Wait for 7 seconds
+      await new Promise(resolve => setTimeout(resolve, 7000));
+
       // Call API to buy assets
       await buyAssetAPI();
 
