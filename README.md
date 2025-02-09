@@ -2,7 +2,11 @@
     <img width="100%" src="cover.png"> 
 </p>
 
-> Try our product: [here](https://baishi.up.railway.app/)
+
+# Try Bai Shi: [here](https://baishi.up.railway.app/)
+Prerequisites:
+- ETH in Base Sepolia Testnet in your wallet (you can get it from [faucet](https://www.alchemy.com/faucets/base-sepolia))
+- USDC in Base Sepolia Testnet in your wallet (you can get it from [faucet](https://faucet.circle.com/))
 
 # Bai Shi - Whiterock
 
