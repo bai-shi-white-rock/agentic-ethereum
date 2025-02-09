@@ -40,7 +40,7 @@ We believe that as RWAs (Real-World Assets) move on-chain, investors will face a
 - **Indexing**: The Graph
 - **AI Model**: gpt-4o-mini
 
-## How It Works
+### How It Works
 
 <p align="center" width="100%">
     <img width="100%" src="howitworks1.png"> 
@@ -66,16 +66,16 @@ We believe that as RWAs (Real-World Assets) move on-chain, investors will face a
 
 5. **Monitor your portfolio**: We will monitor your portfolio and make adjustments as needed.
 
-## How it's made
+### How it's made
 We use reasoning LLM to understand the investor's risk preference and translate that into strategic asset allocation by using the RAG technique.  We use AgentKit by Coinbase to handle on-chain transactions on behalf of our users. And let the Graph do indexing for calculating financial information on-chain for us. 
 
-# Challenges
+### Challenges
 
 - Choices of on-chain assets are limited nowsaday
 - API to buy assets on-chain easily
 - Oracle to check if the user are eligible for the investment
 
-## Project Structure
+### Project Structure
 The project is split into 4 packages:
 
 - `contract`: contains the smart contracts
