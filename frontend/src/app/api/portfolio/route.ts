@@ -54,7 +54,7 @@ const query = gql`
 `;
 
 const url =
-  "https://api.studio.thegraph.com/query/103189/bai-shi-2/version/latest";
+  "https://api.studio.thegraph.com/query/103189/bai-shi-3/version/latest";
 
 export async function GET(request: Request) {
   try {
