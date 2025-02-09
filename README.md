@@ -2,7 +2,7 @@
     <img width="100%" src="cover.png"> 
 </p>
 
-> Try our product: [here]()
+> Try our product: [here](https://baishi.up.railway.app/)
 
 # Bai Shi - Whiterock
 

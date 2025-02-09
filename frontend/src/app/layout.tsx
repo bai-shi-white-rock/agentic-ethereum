@@ -14,6 +14,7 @@ const notoSans = Noto_Sans({
 export const metadata: Metadata = {
   title: "Bai Shi - Whiterock",
   description: "Your Personal Financial Advisory Agent. Helping you reach your investing goals through on-chain economy",
+  metadataBase: new URL('https://baishi.up.railway.app'),
   openGraph: {
     title: "Bai Shi - Whiterock",
     description: "Your Personal Financial Advisory Agent. Helping you reach your investing goals through on-chain economy",
